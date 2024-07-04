@@ -51,7 +51,8 @@ def Set7List(num:int) -> str:                                   #Партия 7 
 def GlobalScoreList(num:int) -> str:                     #Общий счет из "Список матчей"
     return df_match['Общий счет'].values[num]
 
-def 
+def CompNameList(num:int) -> str:
+    return df_match['Название соревнований'].values[num]
 
 
 df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
