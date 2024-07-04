@@ -4,7 +4,7 @@ def MatchesInput() -> None: #Обновление файла "Список ма�
 def Profile() -> str: #Сбор информации из "База"
     pass
 
-def MatchesOutput() -> int: #Подсчет матчей из "Список матчей"
+def CounterMatches() -> int: #Подсчет матчей из "Список матчей"
     pass
 
 def RaitingUpdateKOFNT() -> None: #Обновление рейтинга КОФНТ в "База"
@@ -12,3 +12,15 @@ def RaitingUpdateKOFNT() -> None: #Обновление рейтинга КОФ�
 
 def RaitingUpdateFNTR() -> None: #Обновление рейтинга ФНТР в "База"
     pass
+
+def RaitingOutput() -> str: #Вывод рейтинга
+    pass
+
+def KOFNTDocumentsOutput() -> 
+def GovermentKOFNT() -> str: #Список важных шишек федерации
+    pass
+
+def LastMathches() -> str: #Список последних матчей
+    pass
+
+def 
