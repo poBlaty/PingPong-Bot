@@ -33,3 +33,16 @@ def CounterOfSets() -> int: #Подсчет партий
 
 def CounterOfPoint() -> int: #Подсчет очков
     pass
+
+def CompsToRegistr() -> str: #Список труниров для регитсрации
+    pass
+
+def BetsWins() -> str: #Лучшие победы игрока
+    pass
+
+def OtherProfile(name:str) -> str: #Сбор информации из "База" о других игроках
+    pass 
+
+def Versus(player1:str, player2:str) -> str: #Сбор данных из "Список матчей" для 2-х игроков
+    pass
+
