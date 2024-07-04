@@ -13,7 +13,7 @@ def RaitingUpdateKOFNT() -> None: #Обновление рейтинга КОФ�
 def RaitingUpdateFNTR() -> None: #Обновление рейтинга ФНТР в "База"
     pass
 
-def RaitingOutput() -> str: #Вывод рейтинга
+def RaitingOutput(border1:int, border2:int) -> str: #Вывод рейтинга
     pass
 
 def KOFNTDocumentsOutput() -> str: #Вывод списка документов 
@@ -28,10 +28,10 @@ def GovermentKOFNT() -> str: #Список важных шишек федера�
 def LastMathches() -> str: #Список последних матчей
     pass
 
-def CounterOfSets() -> int: #Подсчет партий
+def CounterOfSets(period:str) -> int: #Подсчет партий
     pass
 
-def CounterOfPoint() -> int: #Подсчет очков
+def CounterOfPoint(period:str) -> int: #Подсчет очков
     pass
 
 def CompsToRegistr() -> str: #Список труниров для регитсрации
@@ -46,3 +46,4 @@ def OtherProfile(name:str) -> str: #Сбор информации из "База
 def Versus(player1:str, player2:str) -> str: #Сбор данных из "Список матчей" для 2-х игроков
     pass
 
+def Roles()
