@@ -60,5 +60,3 @@ def CompNameList(num:int) -> str:
 
 df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
 df_match = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx")
-
-print(GlobalScoreList(0))
