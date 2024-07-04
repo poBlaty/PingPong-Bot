@@ -16,11 +16,20 @@ def RaitingUpdateFNTR() -> None: #Обновление рейтинга ФНТР
 def RaitingOutput() -> str: #Вывод рейтинга
     pass
 
-def KOFNTDocumentsOutput() -> 
+def KOFNTDocumentsOutput() -> str: #Вывод списка документов 
+    pass
+
+def KOFNTResultsComps() -> str: #Вывод списка результатов сорев
+    pass
+
 def GovermentKOFNT() -> str: #Список важных шишек федерации
     pass
 
 def LastMathches() -> str: #Список последних матчей
     pass
 
-def 
+def CounterOfSets() -> int: #Подсчет партий
+    pass
+
+def CounterOfPoint() -> int: #Подсчет очков
+    pass
