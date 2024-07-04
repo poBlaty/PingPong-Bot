@@ -30,57 +30,31 @@ def CityBase(num:int) -> str:                        #Город из "База"
 def Name1List(num:int) -> str:                       #Имя 1 из "Список матчей"
     return df_match['Имя 1'].values[num]
 
-def Name2List(num:int) -> str:                       #Имя 1 из "Список матчей"
+def Name2List(num:int) -> str:                       #Имя 2 из "Список матчей"
     return df_match['Имя 2'].values[num]
 
-def Set1() -> str:                                   #Партия 1 из "Список матчей"
-    pass
-def Set2() -> str:                                   #Партия 2 из "Список матчей"
-    pass
-def Set3() -> str:                                   #Партия 3 из "Список матчей"
-    pass
-def Set4() -> str:                                   #Партия 4 из "Список матчей"
-    pass
-def Set5() -> str:                                   #Партия 5 из "Список матчей"
-    pass
-def Set6() -> str:                                   #Партия 6 из "Список матчей"
-    pass
-def Set7() -> str:                                   #Партия 7 из "Список матчей"
-    pass
+def Set1List(num:int) -> str:                                   #Партия 1 из "Список матчей"
+    return (f'{int(df_match["Партия 1 1"].values[num])}:{int(df_match["Партия 1 2"].values[num])}')
+def Set2List(num:int) -> str:                                   #Партия 2 из "Список матчей"
+    return (f'{int(df_match["Партия 2 1"].values[num])}:{int(df_match["Партия 2 2"].values[num])}')
+def Set3List(num:int) -> str:                                   #Партия 3 из "Список матчей"
+    return (f'{int(df_match["Партия 3 1"].values[num])}:{int(df_match["Партия 3 2"].values[num])}')
+def Set4List(num:int) -> str:                                   #Партия 4 из "Список матчей"
+    return (f'{int(df_match["Партия 4 1"].values[num])}:{int(df_match["Партия 4 2"].values[num])}')
+def Set5List(num:int) -> str:                                   #Партия 5 из "Список матчей"
+    return (f'{int(df_match["Партия 5 1"].values[num])}:{int(df_match["Партия 5 2"].values[num])}')
+def Set6List(num:int) -> str:                                   #Партия 6 из "Список матчей"
+    return (f'{int(df_match["Партия 6 1"].values[num])}:{int(df_match["Партия 6 2"].values[num])}')
+def Set7List(num:int) -> str:                                   #Партия 7 из "Список матчей"
+    return (f'{int(df_match["Партия 7 1"].values[num])}:{int(df_match["Партия 7 2"].values[num])}')
 
-def GlobalScore(num:int) -> str:                     #Общий счет из "Список матчей"
+def GlobalScoreList(num:int) -> str:                     #Общий счет из "Список матчей"
     return df_match['Общий счет'].values[num]
 
-def BetsWinsList() -> str:                           #Лучшие победы игрока из "Список матчей"
-    pass
-
-def LastMathchesList() -> str:                       #Список последних матчей из "Список матчей"
-    pass 
-
-def CounterMatchesList() -> int:                     #Кол-во матчей из "Список матчей"
-    pass
-
-def CounterSetsList() -> int:                        #Кол-во партий из "Список матчей"
-    pass
-
-def CounterPointsList() -> int:                      #Кол-во очков из "Список матчей"
-    pass
-
-def GovermentKOFNT() -> str:                         #Список важных шишек федерации
-    pass
-
-def CompsToRegistr() -> str:                         #Список труниров для регистрации
-    pass
-
-def KOFNTDocumentsOutput() -> str:                   #Вывод списка документов 
-    pass
-
-def KOFNTResultsComps() -> str:                      #Вывод списка результатов сорев
-    pass
-
+def 
 
 
 df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
 df_match = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx")
 
-print(df_match['Имя 1'].values[1])
+print(GlobalScoreList(0))
