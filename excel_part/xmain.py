@@ -1,14 +1,14 @@
-def MatchesInput(): #Обновление файла "Список матчей"
+def MatchesInput() -> None: #Обновление файла "Список матчей"
     pass
 
-def Profile(): #Сбор информации из "База"
+def Profile() -> str: #Сбор информации из "База"
     pass
 
-def MatchesOutput(): #Подсчет матчей из "Список матчей"
+def MatchesOutput() -> int: #Подсчет матчей из "Список матчей"
     pass
 
-def RaitingInput(): #Обновление рейтинга КОФНТ в "База"
+def RaitingUpdateKOFNT() -> None: #Обновление рейтинга КОФНТ в "База"
     pass
 
-def Raiting():
+def RaitingUpdateFNTR() -> None: #Обновление рейтинга ФНТР в "База"
     pass
