@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def RaitingFileUpdate(link: str) -> None:
+def RaitingFileUpdate(link: str):
     df_raiting_new_m = pd.read_excel(link)
     df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Рейтинг.xlsx")
 
@@ -39,7 +39,7 @@ def RaitingFileUpdate(link: str) -> None:
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\Рейтинг.xlsx", index=False)
 
 
-def RaitingKOFNTUpdate(link: str) -> None:
+def RaitingKOFNTUpdate(link: str):
     df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
     df_raiting_new_m = pd.read_excel(link)
     l = len(df_raiting_new_m['Фамилия Имя'])
@@ -58,7 +58,7 @@ def RaitingKOFNTUpdate(link: str) -> None:
             for j in range(l):
                 if df_raiting_new_m['Фамилия Имя'].values[j] == three[i]:
                     df_base.at[b + i, "Дата рождения"] = \
-                        str(df_raiting_new_m['Дата рождения'].values[j]).split('T')[0].split(' ')[0]
+                    str(df_raiting_new_m['Дата рождения'].values[j]).split('T')[0].split(' ')[0]
                     df_base.at[b + i, "Рейтинг КОФНТ"] = df_raiting_new_m['Рейтинг'].values[j]
                     df_base.at[b + i, "Город"] = df_raiting_new_m["Город"].values[j]
 
@@ -77,8 +77,24 @@ def RaitingKOFNTUpdate(link: str) -> None:
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
 
 
-def RaitingFNTRUpdate():
-    pass
+def RaitingFNTRUpdate(link: str):
+    df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
+    df_raiting_new_m = pd.read_excel(link)
+    l = len(df_raiting_new_m['Фамилия Имя'])
+    b = len(df_base['Фамилия'])
+    three = []
+
+    for i in range(l):
+        surename = df_raiting_new_m['Фамилия Имя'].values[i].split(' ')[0]
+        surename = surename.replace(' ', '')
+        name = df_raiting_new_m['Фамилия Имя'].values[i].split(' ')[1]
+        name = name.replace(' ', '')
+        raiting = df_raiting_new_m['Рейтинг'].values[i]
+
+        for j in range(b - len(three)):
+            if f"{surename} {name}" == f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}":
+                df_base.at[j, "Рейтинг КОФНТ"] = raiting
+                continue
 
 
 def RaitingRTTFUpdate():

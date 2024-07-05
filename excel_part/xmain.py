@@ -1,44 +1,62 @@
 import pandas as pd
 
+def IsIdInBase(ID: str) -> bool:
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return True
+    return False
 
-def IDBase(num: int) -> str:  # ID из "База"
-    return df_base['ID'].values[num]
+def SurenameBase(ID: str) -> str:  # Фамилия из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Фамилия'].values[i]
 
-
-def SurenameBase(num: int) -> str:  # Фамилия из "База"
-    return df_base['Имя'].values[num]
-
-
-def NameBase(num: int) -> str:  # Имя из "База"
-    return df_base['Фамилия'].values[num]
-
-
-def GenderBase(num: int) -> str:  # Пол из "База"
-    return df_base['Пол'].values[num]
-
-
-def RaitingKOFNTBase(num: int) -> int:  # Рейтинг КОФНТ из "База"
-    return df_base['Рейтинг КОФНТ'].values[num]
+def NameBase(ID: str) -> str:  # Имя из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Имя'].values[i]
 
 
-def RaitingFNTRBase(num: int) -> int:  # Рейтинг ФНТР из "База"
-    return df_base['Рейтинг ФНТР'].values[num]
+def GenderBase(ID: str) -> str:  # Пол из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Пол'].values[i]
 
 
-def RaitingRTTFBase(num: int) -> int:  # Рейтинг РТТФ из "База"
-    return df_base['Рейтинг РТТФ'].values[num]
+def RaitingKOFNTBase(ID: str) -> int:  # Рейтинг КОФНТ из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Рейтинг КОФНТ'].values[i]
 
 
-def BirthdayBase(num: int) -> str:  # Дата рождения из "База"
-    return df_base['Дата рождения'].values[num]
+def RaitingFNTRBase(ID: str) -> int:  # Рейтинг ФНТР из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Рейтинг ФНТР'].values[i]
 
 
-def СategoryBase(num: int) -> str:  # Разряд из "База"
-    return df_base['Спортивный разряд'].values[num]
+def RaitingRTTFBase(ID: str) -> int:  # Рейтинг РТТФ из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Рейтинг РТТФ'].values[i]
 
 
-def CityBase(num: int) -> str:  # Город из "База"
-    return df_base['Город'].values[num]
+def BirthdayBase(ID: str) -> str:  # Дата рождения из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Дата рождения'].values[i]
+
+
+def СategoryBase(ID: str) -> str:  # Разряд из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Дата рождения'].values[i]
+
+
+def CityBase(ID: str) -> str:  # Город из "База"
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return df_base['Город'].values[i]
 
 
 def Name1List(num: int) -> str:  # Имя 1 из "Список матчей"
@@ -85,5 +103,5 @@ def CompNameList(num: int) -> str:
     return df_match['Название соревнований'].values[num]
 
 
-df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
-df_match = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx")
+df_base = pd.read_excel("../data/База.xlsx")
+df_match = pd.read_excel("../data/Список матчей.xlsx")

@@ -1,15 +1,12 @@
 import excel_part.xmain as xl
+import tmain as tl
 
 
 class User:
     id: str
 
-    def __init__(self):
-        # self.id = get_id();
-        pass
-
-    def _auth(self):
-        pass
+    def __init__(self, tid: str):
+        self.id = tid
 
     def choose_player(self):
         pass
@@ -80,3 +77,13 @@ class Admin(User):
 
     def handle_files(self):
         pass
+
+
+def auth(tid: str, username: str, name: str, phone_number: str) -> (User, Player, Trainer, Admin):
+
+    if tid in ('234563467', '12435643'):
+        return Admin(tid)
+
+    if xl.IsIdInBase(tid):
+
+
