@@ -91,18 +91,60 @@ def RaitingFNTRUpdate(link:str):
         
         for j in range(b-len(three)):
             if f"{surename} {name}" == f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}":
-                df_base.at[j, "Рейтинг КОФНТ"] = raiting
+                df_base.at[j, "Рейтинг ФНТР"] = raiting
                 continue
-def RaitingRTTFUpdate():
-    pass
+    df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
 
+def CompUpdate(link:str):
+    
+    df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
+    df_comp_result = pd.ExcelFile(link)
+    sheet1 = df_comp_result.parse('АлфСписокМ')
+    sheet2 = df_comp_result.parse('АлфСписокЖ')
 
-def CategoryUpdate():
-    pass
+    b = len(df_base['Фамилия'])
+    l1 = len(sheet1['A'])
+    l2 = len(sheet2['A'])
 
+    players1 = []
+    for i in range(l1):
+        if sheet1["B"].values[i] not in ['', 'ФИО']:
+            players1.append(str(sheet1["B"].values[i]))
+    players1 = [x for x in players1 if x != 'nan']
 
-def CityUpdate():
-    pass
+    players2 = []
+    for i in range(l2):
+        if sheet1["B"].values[i] not in ['', 'ФИО']:
+            players2.append(str(sheet2["B"].values[i]))
+    players2 = [x for x in players2 if x != 'nan']
+    
+    category1 = []
+    for i in range(len(players1)):
+        category1.append(str(sheet1['D'].values[i+5]))
 
+    city1 = []
+    for i in range(len(players1)):
+        city1.append(str(sheet1['G'].values[i+5]))
 
-RaitingKOFNTUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг КОФНТ\Женщины\Июнь 2024.xlsm")
+    category2 = []
+    for i in range(len(players2)):
+        category2.append(str(sheet2['D'].values[i+5]))
+
+    city2 = []
+    for i in range(len(players2)):
+        city2.append(str(sheet2['G'].values[i+5]))
+
+    players = players1 + players2
+    category = category1 + category2
+    city = city1 + city2
+
+    for i in range(len(players)):
+        for j in range(b):
+            if f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}".lower().strip() == str(players[i]).lower().strip():
+                df_base.at[j, 'Разряд'] = category[i]
+                df_base.at[j, 'Город'] = city[i]
+    
+    df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
+
+# RaitingFNTRUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг ФНТР\Мужчины\Июнь 2024.xlsx")
+CompUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Соревы\Перв. КО до 20 лет 2024.xlsm")
