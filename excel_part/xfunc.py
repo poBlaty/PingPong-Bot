@@ -49,6 +49,3 @@ def CategoryUpdate():
 
 def CityUpdate():
     pass
-
-RaitingFileUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг\Мужчины\Август 2024.xlsm")
-RaitingFileUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг\Женщины\Август 2024.xlsm")
