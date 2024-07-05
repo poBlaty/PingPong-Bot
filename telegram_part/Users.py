@@ -1,12 +1,13 @@
 import excel_part.xmain as xl
 
+
 class User:
     id: str
 
-    # role: str = "guest"
     def __init__(self):
         # self.id = get_id();
         pass
+
     def _auth(self):
         pass
 
@@ -43,7 +44,6 @@ class User:
 
 class Player(User):
 
-
     def get_last_matches(self):
         pass
 
@@ -66,6 +66,7 @@ class Player(User):
 class Trainer(User):
     def players_statistics(self):
         pass
+
 
 class Admin(User):
     def authterize_user(self):
