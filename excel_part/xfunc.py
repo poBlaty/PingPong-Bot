@@ -1,6 +1,6 @@
 import pandas as pd
 
-def RaitingFileUpdate(link:str):
+def RaitingFileUpdate(link:str):                                       #Обновление файла "Рейтинг"
     df_raiting_new_m = pd.read_excel(link)
     df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Рейтинг.xlsx")
     
@@ -37,7 +37,7 @@ def RaitingFileUpdate(link:str):
 
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\Рейтинг.xlsx", index=False)
 
-def RaitingKOFNTUpdate(link:str):
+def RaitingKOFNTUpdate(link:str):                                        #Обновление файла "База" КОФНТ рейтинг
     
     df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
     df_raiting_new_m = pd.read_excel(link)
@@ -74,7 +74,7 @@ def RaitingKOFNTUpdate(link:str):
 
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
 
-def RaitingFNTRUpdate(link:str):
+def RaitingFNTRUpdate(link:str):                                          #Обновление файла "База" ФНТР рейтинг
 
     df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
     df_raiting_new_m = pd.read_excel(link)
@@ -95,7 +95,7 @@ def RaitingFNTRUpdate(link:str):
                 continue
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
 
-def CompUpdate(link:str):
+def CompUpdate(link:str):                                                  #Обновление файла "База" разряд и город
     
     df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
     df_comp_result = pd.ExcelFile(link)
@@ -146,5 +146,3 @@ def CompUpdate(link:str):
     
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
 
-# RaitingFNTRUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг ФНТР\Мужчины\Июнь 2024.xlsx")
-CompUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Соревы\Перв. КО до 20 лет 2024.xlsm")
