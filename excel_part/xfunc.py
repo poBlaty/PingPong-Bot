@@ -1,9 +1,6 @@
 import pandas as pd
 
-def RaitingFileUpdate():
-    pass
-
-def RaitingKOFNTUpdate(link:str):
+def RaitingFileUpdate(link:str):
     df_raiting_new_m = pd.read_excel(link)
     df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Рейтинг.xlsx")
     
@@ -37,7 +34,10 @@ def RaitingKOFNTUpdate(link:str):
                 continue
 
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\Рейтинг.xlsx", index=False)
-        
+
+def RaitingKOFNTUpdate():
+    pass
+
 def RaitingFNTRUpdate():
     pass
 
@@ -50,4 +50,5 @@ def CategoryUpdate():
 def CityUpdate():
     pass
 
-RaitingKOFNTUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг\Мужчины\Август 2024.xlsm")
+RaitingFileUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг\Мужчины\Август 2024.xlsm")
+RaitingFileUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг\Женщины\Август 2024.xlsm")
