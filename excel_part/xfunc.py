@@ -17,11 +17,11 @@ def RaitingFileUpdate(link:str):
         three = list(set(one)-set(two))
         
         for i in range(len(three)):
-            df_base.at[l+i, 'Фамилия'] = three[i].split(' ')[0]
-            df_base.at[l+i, 'Имя'] = three[i].split(' ')[1]
+            df_base.at[b+i, 'Фамилия'] = three[i].split(' ')[0]
+            df_base.at[b+i, 'Имя'] = three[i].split(' ')[1]
             for j in range(l):
                 if df_raiting_new_m['Фамилия Имя'].values[j] == three[i]:
-                    df_base.at[l+i, month] = df_raiting_new_m['Рейтинг'].values[j]
+                    df_base.at[b+i, month] = df_raiting_new_m['Рейтинг'].values[j]
 
     for i in range(l):
         surename = df_raiting_new_m['Фамилия Имя'].values[i].split(' ')[0]
@@ -51,15 +51,14 @@ def RaitingKOFNTUpdate(link:str):
         for i in range(b):
             two.append(f"{df_base['Фамилия'][i]} {df_base['Имя'][i]}")
         three = list(set(one)-set(two))
-
         for i in range(len(three)):
-            df_base.at[l+i, 'Фамилия'] = three[i].split(' ')[0]
-            df_base.at[l+i, 'Имя'] = three[i].split(' ')[1]
+            df_base.at[b+i, 'Фамилия'] = three[i].split(' ')[0]
+            df_base.at[b+i, 'Имя'] = three[i].split(' ')[1]
             for j in range(l):
                 if df_raiting_new_m['Фамилия Имя'].values[j] == three[i]:
-                    df_base.at[l+i, "Дата рождения"] = str(df_raiting_new_m['Дата рождения'].values[j]).split('T')[0]
-                    df_base.at[l+i, "Рейтинг КОФНТ"] = df_raiting_new_m['Рейтинг'].values[j]
-                    df_base.at[l+i, "Город"] = df_raiting_new_m["Город"].values[j]
+                    df_base.at[b+i, "Дата рождения"] = str(df_raiting_new_m['Дата рождения'].values[j]).split('T')[0].split(' ')[0]
+                    df_base.at[b+i, "Рейтинг КОФНТ"] = df_raiting_new_m['Рейтинг'].values[j]
+                    df_base.at[b+i, "Город"] = df_raiting_new_m["Город"].values[j]
 
     for i in range(l):
         surename = df_raiting_new_m['Фамилия Имя'].values[i].split(' ')[0]
@@ -89,4 +88,4 @@ def CityUpdate():
 
 
 
-RaitingFileUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг КОФНТ\Мужчины\Июнь 2024.xlsm")
+RaitingKOFNTUpdate("D:\Git\TT\PingPong-Bot\data\garbage\Рейтинг КОФНТ\Женщины\Июнь 2024.xlsm")
