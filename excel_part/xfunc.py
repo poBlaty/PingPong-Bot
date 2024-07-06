@@ -143,6 +143,53 @@ def CompUpdate(link:str):                                                  #Об
             if f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}".lower().strip() == str(players[i]).lower().strip():
                 df_base.at[j, 'Разряд'] = category[i]
                 df_base.at[j, 'Город'] = city[i]
-    
+
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
 
+def PlayersPlaceOnComp(link:str) -> list:                                  #Участники соревнования и их места из файла с соревами
+    df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
+    df_comp_result = pd.ExcelFile(link)
+    sheet1 = df_comp_result.parse('АлфСписокМ')
+    sheet2 = df_comp_result.parse('АлфСписокЖ')
+
+    sheet_names = df_comp_result.sheet_names
+
+    b = len(df_base['Фамилия'])
+    l1 = len(sheet1['A'])
+    l2 = len(sheet2['A'])
+
+    players1 = []
+    for i in range(l1):
+        if sheet1["B"].values[i] not in ['', 'ФИО']:
+            players1.append(str(sheet1["B"].values[i]))
+    players1 = [x for x in players1 if x != 'nan']
+
+    players2 = []
+    for i in range(l2):
+        if sheet1["B"].values[i] not in ['', 'ФИО']:
+            players2.append(str(sheet2["B"].values[i]))
+    players2 = [x for x in players2 if x != 'nan']
+    players = players1 + players2
+
+    playableSheets = []
+    for i in sheet_names:
+        sheet = df_comp_result.parse(i)
+        try:
+            if sheet["Comp"].values[0] in [8, 16, 24, 32, 48]:
+                playableSheets.append(i)
+        except:
+            continue
+    
+    results = []
+    for i in playableSheets:
+        sheet = df_comp_result.parse(i)
+        places = sheet["Comp"].values[0]
+
+        for j in range(places):
+            results.append([sheet["Место"].values[j+3], str(sheet["Фамилия, имя"].values[j+3]).strip()])
+    
+    results = [x for x in results if x[1] not in ['x', 'х']]
+
+    return results
+
+PlayersPlaceOnComp("D:\Git\TT\PingPong-Bot\data\garbage\Соревы\Перв. КО до 20 лет 2024.xlsm")
