@@ -146,15 +146,13 @@ def CompUpdate(link:str):                                                  #Об
 
     df_base.to_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx", index=False)
 
-def PlayersPlaceOnComp(link:str) -> list:                                  #Участники соревнования и их места из файла с соревами
-    df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
+def PlayersPlaceRaitingOnComp(link:str) -> list:                                 #Участники соревнования, их места, их рейтинг на момент проведения из файла с соревами
     df_comp_result = pd.ExcelFile(link)
     sheet1 = df_comp_result.parse('АлфСписокМ')
     sheet2 = df_comp_result.parse('АлфСписокЖ')
 
     sheet_names = df_comp_result.sheet_names
 
-    b = len(df_base['Фамилия'])
     l1 = len(sheet1['A'])
     l2 = len(sheet2['A'])
 
@@ -186,10 +184,23 @@ def PlayersPlaceOnComp(link:str) -> list:                                  #Уч
         places = sheet["Comp"].values[0]
 
         for j in range(places):
-            results.append([sheet["Место"].values[j+3], str(sheet["Фамилия, имя"].values[j+3]).strip()])
+            results.append([sheet["Место"].values[j+3], str(sheet["Фамилия, имя"].values[j+3]).strip(), sheet["Рейтинг"].values[j+3]])
     
     results = [x for x in results if x[1] not in ['x', 'х']]
-
     return results
 
-PlayersPlaceOnComp("D:\Git\TT\PingPong-Bot\data\garbage\Соревы\Перв. КО до 20 лет 2024.xlsm")
+def CompInfo(link:str) -> list:                                         #Информация о турнире (Название, город проведения, дата)
+    df_comp_result = pd.ExcelFile(link)
+    sheet = df_comp_result.parse('Титульный')
+
+    info = []
+
+    for i in range(len(sheet['A'])):
+        if sheet['A'].values[i] != '':
+            info.append(str(sheet['A'].values[i]))
+
+    info = [x for x in info if x != 'nan']        
+    
+    return info
+
+print(CompInfo("D:\Git\TT\PingPong-Bot\data\garbage\Соревы\Перв. КО до 20 лет 2024.xlsm"))
