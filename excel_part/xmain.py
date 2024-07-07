@@ -5,6 +5,21 @@ def IsIdInBase(ID: str) -> bool:
         return True
     return False
 
+def GetRoles(ID: str) -> list:
+    roles = []
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            if df_base["Игрок"].values[i] == 1:
+                roles.append('Игрок')
+            if df_base["Тренер"].values[i] == 1:
+                roles.append('Тренер')
+            if df_base["Судья"].values[i] == 1:
+                roles.append('Судья')
+            if df_base["Админ"].values[i] == 1:
+                roles.append('Админ')
+            break
+    return roles
+
 def SurenameBase(ID: str) -> str:  # Фамилия из "База"
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:

@@ -104,8 +104,8 @@ def CompUpdate(link:str):                                                  #Об
     sheet2 = df_comp_result.parse('АлфСписокЖ')
 
     b = len(df_base['Фамилия'])
-    l1 = len(sheet1['Unnamed: 0'])
-    l2 = len(sheet2['Unnamed: 0'])
+    l1 = len(sheet1.iloc[0,0])
+    l2 = len(sheet2.iloc[0,0])
 
     players1 = []
     for i in range(l1):
@@ -154,8 +154,8 @@ def PlayersPlaceRaitingOnComp(link:str) -> list:                                
 
     sheet_names = df_comp_result.sheet_names
 
-    l1 = len(sheet1['Первенство'])
-    l2 = len(sheet2['Первенство'])
+    l1 = len(sheet1.iloc[0,0])
+    l2 = len(sheet2.iloc[0,0])
 
     players1 = []
     for i in range(l1):
@@ -174,7 +174,7 @@ def PlayersPlaceRaitingOnComp(link:str) -> list:                                
     for i in sheet_names:
         sheet = df_comp_result.parse(i)
         try:
-            if sheet['Unnamed: 0'].values[0] in [8, 16, 24, 32, 48]:
+            if sheet['Unnamed: 10'].values[0] in [8, 16, 24, 32, 48]:
                 playableSheets.append(i)
         except:
             continue
@@ -182,7 +182,7 @@ def PlayersPlaceRaitingOnComp(link:str) -> list:                                
     results = []
     for i in playableSheets:
         sheet = df_comp_result.parse(i)
-        places = sheet['Unnamed: 0'].values[0]
+        places = sheet['Unnamed: 10'].values[0]
 
         for j in range(places):
             results.append([sheet["Место"].values[j+3], str(sheet["Фамилия, имя"].values[j+3]).strip(), sheet["Рейтинг"].values[j+3]])
@@ -287,4 +287,4 @@ def ListMatchUpdate(link:str):                                          #Обн�
 
         df_list_match.to_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx", index=False)
 
-ListMatchUpdate('data/garbage/Соревы/23 февраля.xlsm')
+print(PlayersPlaceRaitingOnComp('data/garbage/Соревы/Тур. День Г..xlsm'))
