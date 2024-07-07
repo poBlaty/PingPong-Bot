@@ -205,8 +205,7 @@ def CompInfo(link:str) -> list:                                         #Инф�
     info = [f"{info[0]} {info[1]} {info[2]}", info[3], info[4]]
     return info
 
-
-def ListMatchUpdate(link:str):
+def ListMatchUpdate(link:str):                                          #Обновление файла Список матчей
     df_comp_result = pd.ExcelFile(link)
     df_list_match = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx")
     sheet_names = df_comp_result.sheet_names
@@ -216,7 +215,7 @@ def ListMatchUpdate(link:str):
     for i in sheet_names:
         sheet = df_comp_result.parse(i)
         try:
-            if sheet['Unnamed: 0'].values[0] in [8, 16, 24, 32, 48]:
+            if sheet['Unnamed: 10'].values[0] in [8, 16, 24, 32, 48]:
                 playableSheets.append(i)
         except:
             continue
@@ -232,7 +231,7 @@ def ListMatchUpdate(link:str):
             except:
                 continue
         value.append([v, i])
- 
+
     for i in range(len(value)):
         sheet = df_comp_result.parse(value[i][1])
 
@@ -264,8 +263,8 @@ def ListMatchUpdate(link:str):
         matches.insert(0, CompInfo(link)[0])
 
         matchesFinal = []
-        for j in range(len(matches)):
-            if matches[j][2] == 'x' or matches[j][2] == 'х' or matches[j][-1] == 'x' or matches[j][-1] == 'х':
+        for j in range(1, len(matches)):
+            if matches[j][2] == 'x' or matches[j][2] == 'х' or matches[j][-1] == 'x' or matches[j][-1] == 'х' or int(matches[j][3])+int(matches[j][4])<3:
                 continue
             else:
                 matchesFinal.append(matches[j])
@@ -278,6 +277,7 @@ def ListMatchUpdate(link:str):
             df_list_match.at[l+j, 'Стадия'] = matchesFinal[j][1]
             df_list_match.at[l+j, 'Имя 1'] = matchesFinal[j][2]
             df_list_match.at[l+j, 'Имя 2'] = matchesFinal[j][-1]
+            df_list_match.at[l+j, 'Название соревнований'] = matches[0]
 
             points = matchesFinal[j][5].split(', ')
 
@@ -287,3 +287,4 @@ def ListMatchUpdate(link:str):
 
         df_list_match.to_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx", index=False)
 
+ListMatchUpdate('data/garbage/Соревы/23 февраля.xlsm')
