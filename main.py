@@ -9,17 +9,16 @@ from aiogram.utils.markdown import hide_link
 from aiogram.types import FSInputFile, Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
+
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
 # Объект бота
 bot = Bot(token="7150060641:AAGjucG-rJFSGzxRDfsWMBOB2vrFJhF7U84")
 # Диспетчер
 dp = Dispatcher()
-
-
 # Хэндлер на команду /start
 
-# СТАРТ
+#СТАРТ
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     kb = [
@@ -38,12 +37,12 @@ async def cmd_start(message: types.Message):
       предоставленных, чтобы получить нужную для вас информацию.\n❗ Я ругаюсь матом! Если тебя это не\
        устраивает – не пользуйся ботом", reply_markup=keyboard)
 
-
-# КОФНТ
+#КОФНТ
 @dp.message(F.text.lower() == "кофнт")
 async def cmd_start(message: types.Message):
     wb = [
         [types.KeyboardButton(text="Архив")],
+        [types.KeyboardButton(text="судейский корпус")],
         [types.KeyboardButton(text="Уважаемые люди")],
         [types.KeyboardButton(text="Общая стата")],
         [types.KeyboardButton(text="На главную")]
@@ -55,7 +54,6 @@ async def cmd_start(message: types.Message):
     )
     await message.answer("в это разделе вы можете получить подробную информацию о Калининградской \
     областной федерации настольного тенниса.", reply_markup=keyboard)
-
 
 @dp.message(F.text.lower() == "архив")
 async def cmd_start(message: types.Message):
@@ -71,7 +69,6 @@ async def cmd_start(message: types.Message):
     )
     await message.answer("конкретику пж", reply_markup=keyboard)
 
-
 @dp.message(F.text.lower() == "результаты")
 async def cmd_start(message: types.Message):
     wb = [
@@ -83,7 +80,6 @@ async def cmd_start(message: types.Message):
         input_field_placeholder="выбирите пункт меню:"
     )
     await message.answer("BlueLock 4 - 3 U20", reply_markup=keyboard)
-
 
 @dp.message(F.text.lower() == "документы федерации")
 async def cmd_start(message: types.Message):
@@ -97,7 +93,6 @@ async def cmd_start(message: types.Message):
     )
     await message.answer("все официально", reply_markup=keyboard)
 
-
 @dp.message(F.text.lower() == "уважаемые люди")
 async def cmd_start(message: types.Message):
     wb = [
@@ -110,7 +105,6 @@ async def cmd_start(message: types.Message):
     )
     await message.answer("всех ненавидим", reply_markup=keyboard)
 
-
 @dp.message(F.text.lower() == "общая стата")
 async def cmd_start(message: types.Message):
     wb = [
@@ -122,13 +116,9 @@ async def cmd_start(message: types.Message):
         input_field_placeholder="выбирите пункт меню:"
     )
     await message.answer("все проигрываем в нулину", reply_markup=keyboard)
-
-
-# профиль
-@dp.message(F.text.lower() == "профиль")
+@dp.message(F.text.lower() == "судейский корпус")
 async def cmd_start(message: types.Message):
     wb = [
-        [types.KeyboardButton(text="внешность")],
         [types.KeyboardButton(text="На главную")]
     ]
     keyboard = types.ReplyKeyboardMarkup(
@@ -136,10 +126,74 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True,
         input_field_placeholder="выбирите пункт меню:"
     )
-    await message.answer("что вы хотите узнать про себя?", reply_markup=keyboard)
+    await message.answer("судей на мыло", reply_markup=keyboard)
 
+#профиль
+#попытался сделать что просил леша со словарем
 
-# Рейтинг
+dict = {
+    '1134175573' : 'егорчик топчик',
+    '848311771' : 'полинка боева',
+    '1044276987' : 'коля ты дэбил'
+}
+
+@dp.message(F.data == "профиль")
+def ApplyToRegistraition(message: types.Message):
+    user_id = str(message.from_user.id)
+    dict_id = dict.keys()
+    if user_id not in dict_id:
+        return False
+    else:
+        return True
+@dp.message(F.text.lower() == "профиль")
+async def cmd_start(message: types.Message):
+    if ApplyToRegistraition(message) == True:
+        wb = [
+            [types.KeyboardButton(text="внешность")],
+            [types.KeyboardButton(text="имя")],
+            [types.KeyboardButton(text="На главную")]
+        ]
+        keyboard = types.ReplyKeyboardMarkup(
+            keyboard=wb,
+            resize_keyboard=True,
+            input_field_placeholder="выбирите пункт меню:"
+        )
+        await message.answer("что вы хотите узнать про себя?", reply_markup=keyboard)
+    else:
+        wb = [
+            [types.KeyboardButton(text="На главную")]
+        ]
+        keyboard = types.ReplyKeyboardMarkup(
+            keyboard=wb,
+            resize_keyboard=True,
+            input_field_placeholder="выбирите пункт меню:"
+        )
+        await message.answer("заявления на регистрацию пока что обрабатывется", reply_markup=keyboard)
+@dp.message(F.text.lower() == "имя")
+async def cmd_start(message: types.Message):
+    name = dict.get(str(message.from_user.id))
+    wb = [
+        [types.KeyboardButton(text="На главную")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=wb,
+        resize_keyboard=True,
+        input_field_placeholder="выбирите пункт меню:"
+    )
+    await message.answer(str(name), reply_markup=keyboard)
+@dp.message(F.text.lower() == 'внешность')
+async def send_photo(message: types.Message):
+    photo = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4ggL9SDGrEWYe3uCxEF1ynQIjmTcbqxnONQ&s'
+    wb = [
+        [types.KeyboardButton(text="На главную")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=wb,
+        resize_keyboard=True,
+        input_field_placeholder="выбирите пункт меню:"
+    )
+    await bot.send_photo(message.chat.id, photo, caption='какой красавчик!', reply_markup=keyboard)
+#Рейтинг
 @dp.message(F.text.lower() == "рейтинг")
 async def cmd_start(message: types.Message):
     wb = [
@@ -152,8 +206,7 @@ async def cmd_start(message: types.Message):
     )
     await message.answer("топ 1: атон аранов\n и тд", reply_markup=keyboard)
 
-
-# Запись на турнир
+#Запись на турнир
 @dp.message(F.text.lower() == "запись на турнир")
 async def cmd_random(message: types.Message):
     builder = InlineKeyboardBuilder()
@@ -171,8 +224,6 @@ async def cmd_random(message: types.Message):
         "здесь реализуется запись на турнир!",
         reply_markup=builder.as_markup()
     )
-
-
 """@dp.callback_query(F.data == "random_value1")
 async def send_random_value(callback: types.CallbackQuery):
     await callback.message.answer("https://www.youtube.com/watch?v=r0k5CxR0pys&t=337s&ab_channel=CoupleGuys")
@@ -188,9 +239,7 @@ async def start(message: types.Message):
     keyboard_markup.add(button)
     await message.answer('Click the button to visit the website:', reply_markup=keyboard_markup)
 """
-
-
-# на главную
+#на главную
 @dp.message(F.text.lower() == "на главную")
 async def cmd_start(message: types.Message):
     kb = [
@@ -209,21 +258,16 @@ async def cmd_start(message: types.Message):
       предоставленных, чтобы получить нужную для вас информацию.\n❗ Я ругаюсь матом! Если тебя это не\
        устраивает – не пользуйся ботом", reply_markup=keyboard)
 
-
-# id and username
+#id and username
 @dp.message(Command("id"))
 async def start(msg: types.Message):
     await bot.send_message(msg.from_user.id, msg.from_user.first_name)
-
-
 @dp.message(Command("username"))
 async def get_username(message: types.Message):
     username = message.from_user.username
     await message.answer(f"{username}")
-
-
 @dp.message(Command("userid"))
-async def get_id(message: types.Message):
+async def getuserid(message: types.Message):
     user_id = message.from_user.id
     await message.answer(f"{user_id}")
 
@@ -231,7 +275,6 @@ async def get_id(message: types.Message):
 # Запуск процесса поллинга новых апдейтов
 async def main():
     await dp.start_polling(bot)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

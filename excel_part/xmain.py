@@ -1,9 +1,8 @@
 import pandas as pd
 
 def IsIdInBase(ID: str) -> bool:
-    for i in range(len(df_base)):
-        if ID == df_base["ID"].values[i]:
-            return True
+    if df_base.isin(ID):
+        return True
     return False
 
 def SurenameBase(ID: str) -> str:  # Фамилия из "База"
@@ -33,13 +32,6 @@ def RaitingFNTRBase(ID: str) -> int:  # Рейтинг ФНТР из "База"
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
             return df_base['Рейтинг ФНТР'].values[i]
-
-
-def RaitingRTTFBase(ID: str) -> int:  # Рейтинг РТТФ из "База"
-    for i in range(len(df_base)):
-        if ID == df_base["ID"].values[i]:
-            return df_base['Рейтинг РТТФ'].values[i]
-
 
 def BirthdayBase(ID: str) -> str:  # Дата рождения из "База"
     for i in range(len(df_base)):
