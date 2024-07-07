@@ -286,5 +286,3 @@ def ListMatchUpdate(link:str):                                          #Обн�
             df_list_match.at[l+j, 'Общий счет'] = f"{matchesFinal[j][3]}:{matchesFinal[j][4]}"
 
         df_list_match.to_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx", index=False)
-
-print(PlayersPlaceRaitingOnComp('data/garbage/Соревы/Тур. День Г..xlsm'))
