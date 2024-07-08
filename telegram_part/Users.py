@@ -1,38 +1,67 @@
 import excel_part.xmain as xl
+import excel_part.xfunctoconcl as cl
+import main as tl
+import redis
+
+
+db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
 
 
 class User:
     id: str
+    name: str
+    surname: str
 
-    def __init__(self):
-        # self.id = get_id();
+    def __init__(self, tid: str):
+        self.id = tid
+
+    def getId(self):
+        return self.id
+
+    def choosePlayer(self, name: str, surname: str) -> int:
+        if xl.getIdByName(name, surname) is None:
+            return -1 # not in excel or name or surname are wrong
+        self.name = name
+        self.surname = surname
+        return 1
+
+    def bestWins(self):
+        cl.LastComp(self.name, self.surname)
+
+    def getLastMatches(self):
         pass
 
-    def _auth(self):
+    def getProcfile(self):
         pass
 
-    def choose_player(self):
+    def getStatistics(self):
         pass
 
-    def best_wins(self):
+    def __getGraphic(self):
         pass
 
-    def match_statistics(self):
+    def registrationOnTour(self):
         pass
 
-    def common_info(self):
+    def __getFileToTour(self):
+        pass
+
+    def matchStatistics(self):
+        pass
+
+    def commonInfo(self):
         pass
 
     def employees(self):
         pass
 
-    def common_statistics(self):
+    def commonStatistics(self):
         pass
 
     def archivePDF(self):
         pass
 
-    def match_resultsPDF(self):
+    def matchResultsPDF(self):
         pass
 
     def documentsPDF(self):
@@ -43,40 +72,78 @@ class User:
 
 
 class Player(User):
+    def __init__(self, tid: str):
+        super().__init__(tid)
+        self.name = xl.NameBase(tid)
+        self.surname = xl.SurenameBase(tid)
 
-    def get_last_matches(self):
-        pass
 
-    def get_procfile(self):
-        pass
+class Referee(Player):
+    pass
 
-    def get_statistics(self):
-        pass
 
-    def __get_graphic(self):
-        pass
+class Trainer(Player):
 
-    def registration_tour(self):
-        pass
-
-    def __get_file_to_tour(self):
+    def playersStatistics(self):
         pass
 
 
-class Trainer(User):
-    def players_statistics(self):
+class Admin(Trainer, Referee):
+
+    def authterizeUser(self):
         pass
 
-
-class Admin(User):
-    def authterize_user(self):
-        pass
-
-    def write_user(self):
+    def writeUser(self):
         pass
 
     def notification(self):
         pass
 
-    def handle_files(self):
+    def handleFiles(self):
         pass
+
+
+def signIn(user: User, username: str = None, name: str = None, phone_number: str = None) -> (
+        User, Player, Trainer, Admin):
+    tid = user.getId()
+    cash_time = 600  # 10 minutes
+    cash = db.get(tid)
+
+    if cash is not None:
+        del user
+        if cash == 'Тренер':
+            return Trainer(tid)
+        if cash == 'Админ':  # '6126011940'
+            return Admin(tid)
+        if cash == 'Судья':
+            return Referee(tid)
+        if cash == 'Игрок':
+            return Player(tid)
+
+    if xl.IsIdInBase(tid):
+        role = xl.GetRoles(tid)
+        del user
+        if 'Админ' in role:
+            db.setex(tid, cash_time, 'Админ')  # add to cash
+            return Admin(tid)
+        if 'Тренер' in role:
+            db.setex(tid, cash_time, 'Тренер')
+            return Trainer(tid)
+        if 'Судья' in role:
+            db.setex(tid, cash_time, 'Судья')
+            return Referee(tid)
+        if 'Игрок' in role:
+            db.setex(tid, cash_time, 'Игрок')
+            return Player(tid)
+
+    db.hset(tid, name, username, phone_number)
+    for AdminId in xl.findByRole('Admin'):  ## send to all Admins
+        Admin.authterizeUser(AdminId)
+    tl.ApplyToRegistraition()
+
+    return user
+
+
+# r.set('foo', 'baar')
+# True
+print(db.get(123))
