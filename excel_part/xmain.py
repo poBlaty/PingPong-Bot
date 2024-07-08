@@ -127,8 +127,8 @@ def CompNameList(num: int) -> str:              # Название соревн�
     return df_match['Название соревнований'].values[num]
 
 
-df_base = pd.read_excel("../data/База.xlsx")
-df_match = pd.read_excel("../data/Список матчей.xlsx")
+df_base = pd.read_excel("data/База.xlsx")
+df_match = pd.read_excel("data/Список матчей.xlsx")
 
 
 print(GetIdByName("Егор", "Зинчук"))
