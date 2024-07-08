@@ -1,34 +1,50 @@
 import pandas as pd
 
-def IsIdInBase(ID: str) -> bool:
+
+def IsIdInBase(ID: str) -> bool:                #Есть ли в базе такой id
     if df_base.isin(ID):
         return True
     return False
 
-def GetRoles(ID: str) -> list:
+
+def GetRoles(ID: str) -> list:                  #Роли человека по id
     roles = []
+    rolesBase = ["Игрок", "Тренер", "Судья", "Админ"]
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
-            if df_base["Игрок"].values[i] == 1:
-                roles.append('Игрок')
-            if df_base["Тренер"].values[i] == 1:
-                roles.append('Тренер')
-            if df_base["Судья"].values[i] == 1:
-                roles.append('Судья')
-            if df_base["Админ"].values[i] == 1:
-                roles.append('Админ')
+            for j in rolesBase:
+                if df_base[j].values[i] == 1:
+                    roles.append(j)
             break
     return roles
+
+
+def FindByRole(role: str) -> list:
+    id = []
+    for i in range(len(df_base)):
+        if df_base[role].values[i] == 1:
+            id.append(df_base["ID"].values[i])
+    return id
+
 
 def SurenameBase(ID: str) -> str:  # Фамилия из "База"
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
             return df_base['Фамилия'].values[i]
 
+
 def NameBase(ID: str) -> str:  # Имя из "База"
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
             return df_base['Имя'].values[i]
+
+
+def GetIdByName(name: str, surename) -> str:                # ID по имени
+    fullname = surename + name
+    for i in range(len(df_base)): 
+        if str(fullname).replace(' ', '').lower() == str(df_base["Фамилия"].values[i]).lower() + str(df_base["Имя"].values[i]).lower():
+            return df_base["ID"].values[i]
+    return 0
 
 
 def GenderBase(ID: str) -> str:  # Пол из "База"
@@ -47,6 +63,7 @@ def RaitingFNTRBase(ID: str) -> int:  # Рейтинг ФНТР из "База"
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
             return df_base['Рейтинг ФНТР'].values[i]
+
 
 def BirthdayBase(ID: str) -> str:  # Дата рождения из "База"
     for i in range(len(df_base)):
@@ -106,9 +123,12 @@ def GlobalScoreList(num: int) -> str:  # Общий счет из "Список 
     return df_match['Общий счет'].values[num]
 
 
-def CompNameList(num: int) -> str:
+def CompNameList(num: int) -> str:              # Название соревнований
     return df_match['Название соревнований'].values[num]
 
 
 df_base = pd.read_excel("D:\Git\TT\PingPong-Bot\data\База.xlsx")
 df_match = pd.read_excel("D:\Git\TT\PingPong-Bot\data\Список матчей.xlsx")
+
+
+print(GetIdByName("Егор", "Зинчук"))
