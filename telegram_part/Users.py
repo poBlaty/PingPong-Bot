@@ -26,7 +26,8 @@ class User:
         return 1
 
     def bestWins(self):
-        cl.LastComp(self.name, self.surname)
+        cl.LastComp(self.surname + " " + self.name)
+        pass
 
     def getLastMatches(self):
         pass
@@ -145,5 +146,6 @@ def signIn(user: User, username: str = None, name: str = None, phone_number: str
 
 
 # r.set('foo', 'baar')
-# True
-print(db.get(123))
+# print(db.get(123))
+
+
