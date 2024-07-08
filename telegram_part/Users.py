@@ -26,10 +26,10 @@ class User:
         return 1
 
     def bestWins(self):
-        cl.LastComp(self.surname + " " + self.name)
         pass
 
     def getLastMatches(self):
+        cl.LastComp(self.surname + " " + self.name)
         pass
 
     def getProcfile(self):
