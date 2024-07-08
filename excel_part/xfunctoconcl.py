@@ -69,7 +69,9 @@ def BestWins(name: str) -> list:
     
     for i in range(l-1, -1, -1):
         point = '('
+        winner = ''
         if int(str(df_list_match['Общий счет'].values[i]).split(':')[0]) > int(str(df_list_match['Общий счет'].values[i]).split(':')[1]):
+            winner = str(df_list_match["Имя 1"].values[i]).lower().title()
             for j in range(0, len(sets), 2):
                 if df_list_match[sets[j]].values[i] > df_list_match[sets[j+1]].values[i]:
                     try:
@@ -82,6 +84,7 @@ def BestWins(name: str) -> list:
                     except:
                         continue
         if int(str(df_list_match['Общий счет'].values[i]).split(':')[0]) < int(str(df_list_match['Общий счет'].values[i]).split(':')[1]):
+            winner = str(df_list_match["Имя 2"].values[i]).lower().title()
             for j in range(0, len(sets), 2):
                 if df_list_match[sets[j]].values[i] > df_list_match[sets[j+1]].values[i]:
                     try:
@@ -95,7 +98,7 @@ def BestWins(name: str) -> list:
                         continue
         point = point[:-2]+ ')'
 
-        if (str(df_list_match["Имя 1"].values[i]).lower().title() == name or str(df_list_match["Имя 2"].values[i]).lower().title() == name):
+        if (str(df_list_match["Имя 1"].values[i]).lower().title() == name or str(df_list_match["Имя 2"].values[i]).lower().title() == name) and winner == name:
             result.append(f'{str(df_list_match["Имя 1"].values[i]).lower().title()} {df_list_match["Общий счет"].values[i]} {str(df_list_match["Имя 2"].values[i]).lower().title()} {point}')
 
     print(result)
