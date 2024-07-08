@@ -153,8 +153,7 @@ def CompUpdate(link: str):  # Обновление файла "База" раз�
     df_base.to_excel("data/База.xlsx", index=False)
 
 
-def PlayersPlaceRaitingOnComp(
-        link: str) -> list:  # Участники соревнования, их места, их рейтинг на момент проведения из файла с соревами
+def PlayersPlaceRaitingOnComp(link: str) -> list:  # Участники соревнования, их места, их рейтинг на момент проведения из файла с соревами
     df_comp_result = pd.ExcelFile(link)
     sheet1 = df_comp_result.parse('АлфСписокМ')
     sheet2 = df_comp_result.parse('АлфСписокЖ')
