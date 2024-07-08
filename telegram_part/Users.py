@@ -1,12 +1,16 @@
 import excel_part.xmain as xl
+import excel_part.xfunctoconcl as cl
 import main as tl
 import redis
 
+
 db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
+
 
 class User:
     id: str
     name: str
+    surname: str
 
     def __init__(self, tid: str):
         self.id = tid
@@ -14,11 +18,15 @@ class User:
     def getId(self):
         return self.id
 
-    def choosePlayer(self, name: str):
+    def choosePlayer(self, name: str, surname: str) -> int:
+        if xl.getIdByName(name, surname) is None:
+            return -1 # not in excel or name or surname are wrong
         self.name = name
+        self.surname = surname
+        return 1
 
     def bestWins(self):
-        pass
+        cl.LastComp(self.name, self.surname)
 
     def getLastMatches(self):
         pass
@@ -66,7 +74,12 @@ class User:
 class Player(User):
     def __init__(self, tid: str):
         super().__init__(tid)
-        self.name = xl.getNameById(tid)
+        self.name = xl.NameBase(tid)
+        self.surname = xl.SurenameBase(tid)
+
+
+class Referee(Player):
+    pass
 
 
 class Trainer(Player):
@@ -75,7 +88,7 @@ class Trainer(Player):
         pass
 
 
-class Admin(Trainer):
+class Admin(Trainer, Referee):
 
     def authterizeUser(self):
         pass
@@ -102,17 +115,25 @@ def signIn(user: User, username: str = None, name: str = None, phone_number: str
             return Trainer(tid)
         if cash == 'Админ':  # '6126011940'
             return Admin(tid)
+        if cash == 'Судья':
+            return Referee(tid)
         if cash == 'Игрок':
             return Player(tid)
 
     if xl.IsIdInBase(tid):
-        db.setex(tid, cash_time, xl.getRole(tid))  # add to cash
+        role = xl.GetRoles(tid)
         del user
-        if cash == 'Тренер':
-            return Trainer(tid)
-        if cash == 'Админ':
+        if 'Админ' in role:
+            db.setex(tid, cash_time, 'Админ')  # add to cash
             return Admin(tid)
-        if cash == 'Игрок':
+        if 'Тренер' in role:
+            db.setex(tid, cash_time, 'Тренер')
+            return Trainer(tid)
+        if 'Судья' in role:
+            db.setex(tid, cash_time, 'Судья')
+            return Referee(tid)
+        if 'Игрок' in role:
+            db.setex(tid, cash_time, 'Игрок')
             return Player(tid)
 
     db.hset(tid, name, username, phone_number)
@@ -125,4 +146,4 @@ def signIn(user: User, username: str = None, name: str = None, phone_number: str
 
 # r.set('foo', 'baar')
 # True
-print(db.get('foo'))
+print(db.get(123))
