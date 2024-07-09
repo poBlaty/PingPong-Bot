@@ -76,7 +76,7 @@ def RaitingKOFNTUpdate(link: str):  # Обновление файла "База"
                 df_base.at[j, "Рейтинг КОФНТ"] = raiting
                 continue
 
-    df_base.to_excel("../data/База.xlsx", index=False)
+    df_base.to_excel("data/База.xlsx", index=False)
 
 
 def RaitingFNTRUpdate(link: str):  # Обновление файла "База" ФНТР рейтинг
@@ -307,5 +307,3 @@ def ListMatchUpdate(link: str):  # Обновление файла Список 
             df_list_match.at[l + j, 'Общий счет'] = f"{matchesFinal[j][3]}:{matchesFinal[j][4]}"
 
         df_list_match.to_excel("data/Список матчей.xlsx", index=False)
-
-RaitingFNTRUpdate('data/garbage/Рейтинг ФНТР/Мужчины/Июнь 2024.xlsx')

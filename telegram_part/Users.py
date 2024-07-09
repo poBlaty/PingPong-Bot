@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 import excel_part.xmain as xl
 import excel_part.xfunctoconcl as cl
-import main as tl
+# import main as tl
 import redis
 
 
@@ -119,14 +119,11 @@ class Admin(Trainer, Referee):
         pass
 
 
-def signIn(user: User, username: str = None, name: str = None, phone_number: str = None) -> (
-        User, Player, Trainer, Admin):
-    tid = user.getId()
+def auntendefication(tid: str) -> (User, Player, Trainer, Admin, User):
     cash_time = 600  # 10 minutes
     cash = db.get(tid)
 
     if cash is not None:
-        del user
         if cash == 'Тренер':
             return Trainer(tid)
         if cash == 'Админ':  # '6126011940'
@@ -138,7 +135,6 @@ def signIn(user: User, username: str = None, name: str = None, phone_number: str
 
     if xl.IsIdInBase(tid):
         role = xl.GetRoles(tid)
-        del user
         if 'Админ' in role:
             db.setex(tid, cash_time, 'Админ')  # add to cash
             return Admin(tid)
@@ -152,17 +148,33 @@ def signIn(user: User, username: str = None, name: str = None, phone_number: str
             db.setex(tid, cash_time, 'Игрок')
             return Player(tid)
 
+    return User(tid)
+
+
+def signIn(tid: str, username: str = None, name: str = None, phone_number: str = None) -> User:
+    user = auntendefication(tid)
+    if user is not User:
+        return user
+
     db.hset(tid, name, username, phone_number)
-    for AdminId in xl.findByRole('Admin'):  ## send to all Admins
+    for AdminId in xl.FindByRole('Admin'):  ## send to all Admins
         Admin.authterizeUser(AdminId)
-    tl.ApplyToRegistraition()
 
-    return user
+    return User(tid)
 
 
-# r.set('foo', 'baar')
-# print(db.get(123))
+def auth(func):
+    async def inner(*args):
+        # user = auntendefication(args)
+        return await func(args)
 
-user = User('1134175573')
-user.choosePlayer('Егор', 'Зинчук')
-pprint.pprint(user.bestWins())
+    return inner
+
+
+if __name__ == '__main__':
+    # r.set('foo', 'baar')
+    # print(db.get(123))
+
+    user = User('1134175573')
+    user.choosePlayer('Егор', 'Зинчук')
+    pprint.pprint(user.bestWins())
