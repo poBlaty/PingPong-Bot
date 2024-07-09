@@ -4,9 +4,9 @@ import numpy as np
 
 def RaitingFileUpdate(link: str):  # Обновление файла "Рейтинг"
     df_raiting_new_m = pd.read_excel(link)
-    df_base = pd.read_excel("../data/Рейтинг.xlsx")
+    df_base = pd.read_excel("data/Рейтинг.xlsx")
 
-    month = link.split("\\")[-1].split('.')[0]
+    month = df_raiting_new_m['Unnamed: 5'].values[0]
     l = len(df_raiting_new_m['Фамилия Имя'])
     b = len(df_base['Фамилия'])
     three = []
@@ -37,12 +37,12 @@ def RaitingFileUpdate(link: str):  # Обновление файла "Рейти
                 df_base.at[j, month] = raiting
                 continue
 
-    df_base.to_excel("../data/Рейтинг.xlsx", index=False)
+    df_base.to_excel("data/Рейтинг.xlsx", index=False)
 
 
 def RaitingKOFNTUpdate(link: str):  # Обновление файла "База" КОФНТ рейтинг
 
-    df_base = pd.read_excel("../data/База.xlsx")
+    df_base = pd.read_excel("data/База.xlsx")
     df_raiting_new_m = pd.read_excel(link)
     l = len(df_raiting_new_m['Фамилия Имя'])
     b = len(df_base['Фамилия'])
@@ -81,7 +81,7 @@ def RaitingKOFNTUpdate(link: str):  # Обновление файла "База"
 
 def RaitingFNTRUpdate(link: str):  # Обновление файла "База" ФНТР рейтинг
 
-    df_base = pd.read_excel("../data/База.xlsx")
+    df_base = pd.read_excel("data/База.xlsx")
     df_raiting_new_m = pd.read_excel(link)
     l = len(df_raiting_new_m['Фамилия Имя'])
     b = len(df_base['Фамилия'])
@@ -98,12 +98,12 @@ def RaitingFNTRUpdate(link: str):  # Обновление файла "База" 
             if f"{surename} {name}" == f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}":
                 df_base.at[j, "Рейтинг ФНТР"] = raiting
                 continue
-    df_base.to_excel("../data/База.xlsx", index=False)
+    df_base.to_excel("data/База.xlsx", index=False)
 
 
 def CompUpdate(link: str):  # Обновление файла "База" разряд и город
 
-    df_base = pd.read_excel("../data/База.xlsx")
+    df_base = pd.read_excel("data/База.xlsx")
     df_comp_result = pd.ExcelFile(link)
     sheet1 = df_comp_result.parse('АлфСписокМ')
     sheet2 = df_comp_result.parse('АлфСписокЖ')
@@ -150,11 +150,10 @@ def CompUpdate(link: str):  # Обновление файла "База" раз�
                 df_base.at[j, 'Разряд'] = category[i]
                 df_base.at[j, 'Город'] = city[i]
 
-    df_base.to_excel("../data/База.xlsx", index=False)
+    df_base.to_excel("data/База.xlsx", index=False)
 
 
-def PlayersPlaceRaitingOnComp(
-        link: str) -> list:  # Участники соревнования, их места, их рейтинг на момент проведения из файла с соревами
+def PlayersPlaceRaitingOnComp(link: str) -> list:  # Участники соревнования, их места, их рейтинг на момент проведения из файла с соревами
     df_comp_result = pd.ExcelFile(link)
     sheet1 = df_comp_result.parse('АлфСписокМ')
     sheet2 = df_comp_result.parse('АлфСписокЖ')
@@ -217,10 +216,12 @@ def CompInfo(link: str) -> list:  # Информация о турнире (На
 
 def ListMatchUpdate(link: str):  # Обновление файла Список матчей
     df_comp_result = pd.ExcelFile(link)
-    df_list_match = pd.read_excel("../data/Список матчей.xlsx")
+    df_list_match = pd.read_excel("data/Список матчей.xlsx")
     sheet_names = df_comp_result.sheet_names
 
     playableSheets = []
+
+    data = CompInfo(link)[-1]
 
     for i in sheet_names:
         sheet = df_comp_result.parse(i)
@@ -293,11 +294,16 @@ def ListMatchUpdate(link: str):  # Обновление файла Список 
             df_list_match.at[l + j, 'Имя 1'] = matchesFinal[j][2]
             df_list_match.at[l + j, 'Имя 2'] = matchesFinal[j][-1]
             df_list_match.at[l + j, 'Название соревнований'] = matches[0]
-
+            for k in range(int(sheet['Unnamed: 10'].values[0])+48):
+                if sheet["Фамилия, имя"].values[k] == matchesFinal[j][2]:
+                    df_list_match.at[l + j, 'Рейтинг 1'] = sheet["Рейтинг"].values[k]
+                if sheet["Фамилия, имя"].values[k] == matchesFinal[j][-1]:
+                    df_list_match.at[l + j, 'Рейтинг 2'] = sheet["Рейтинг"].values[k]
             points = matchesFinal[j][5].split(', ')
+            df_list_match.at[l + j, 'Дата'] = data
 
             for k in sets:
                 df_list_match.at[l + j, k] = points[sets.index(k)]
             df_list_match.at[l + j, 'Общий счет'] = f"{matchesFinal[j][3]}:{matchesFinal[j][4]}"
 
-        df_list_match.to_excel("../data/Список матчей.xlsx", index=False)
+        df_list_match.to_excel("data/Список матчей.xlsx", index=False)

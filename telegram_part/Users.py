@@ -1,7 +1,21 @@
+import pprint
+
+from typing import NamedTuple
+
 import excel_part.xmain as xl
 import excel_part.xfunctoconcl as cl
 import main as tl
 import redis
+
+
+class BestWins(NamedTuple):
+    tourName: str
+    player_1: str
+    ranking_1: int
+    total_count: str
+    player_2: str
+    ranking_2: str
+    count: str
 
 
 db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
@@ -19,18 +33,19 @@ class User:
         return self.id
 
     def choosePlayer(self, name: str, surname: str) -> int:
-        if xl.getIdByName(name, surname) is None:
-            return -1 # not in excel or name or surname are wrong
+        if xl.GetIdByName(name, surname) is None:
+            return -1  # not in excel or name or surname are wrong
         self.name = name
         self.surname = surname
         return 1
 
     def bestWins(self):
-        cl.LastComp(self.surname + " " + self.name)
-        pass
+        cl.BestWins(self.surname + " " + self.name)
+
+        return cl.BestWins(self.surname + " " + self.name)
 
     def getLastMatches(self):
-        pass
+        return cl.LastComp(self.surname + " " + self.name)
 
     def getProcfile(self):
         pass
@@ -148,4 +163,6 @@ def signIn(user: User, username: str = None, name: str = None, phone_number: str
 # r.set('foo', 'baar')
 # print(db.get(123))
 
-
+user = User('1134175573')
+user.choosePlayer('Егор', 'Зинчук')
+pprint.pprint(user.bestWins())

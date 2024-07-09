@@ -131,4 +131,4 @@ df_base = pd.read_excel("../data/База.xlsx")
 df_match = pd.read_excel("../data/Список матчей.xlsx")
 
 
-print(GetIdByName("Егор", "Зинчук"))
+# print(GetIdByName("Егор", "Зинчук"))
