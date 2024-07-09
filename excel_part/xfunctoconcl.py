@@ -1,7 +1,7 @@
 import pandas as pd
 
 def LastComp(name: str) -> list:                             #Результаты встреч на последних сыгранных соревах
-    df_list_match = pd.read_excel("../data/Список матчей.xlsx")
+    df_list_match = pd.read_excel("data/Список матчей.xlsx")
 
     sets = ['Партия 1 1', 'Партия 1 2', 'Партия 2 1', 'Партия 2 2', 'Партия 3 1', 'Партия 3 2', 'Партия 4 1', 'Партия 4 2', 'Партия 5 1', 'Партия 5 2', 'Партия 6 1', 'Партия 6 2', 'Партия 7 1', 'Партия 7 2']
     compName = []
@@ -59,8 +59,8 @@ def LastComp(name: str) -> list:                             #Результат
 
     return result
 
-def BestWins(name: str) -> list:                            #Лучшие победы
-    df_list_match = pd.read_excel("../data/Список матчей.xlsx")
+def BestWins(name: str, value: int) -> list:                            #Лучшие победы
+    df_list_match = pd.read_excel("data\Список матчей.xlsx")
 
     sets = ['Партия 1 1', 'Партия 1 2', 'Партия 2 1', 'Партия 2 2', 'Партия 3 1', 'Партия 3 2', 'Партия 4 1', 'Партия 4 2', 'Партия 5 1', 'Партия 5 2', 'Партия 6 1', 'Партия 6 2', 'Партия 7 1', 'Партия 7 2']
     result = []
@@ -124,11 +124,13 @@ def BestWins(name: str) -> list:                            #Лучшие поб
     xs = sorted(x, key=lambda k: k[1], reverse=False)
     result = [x[0] for x in xs]
 
-    return result[:5]
+    value = min(len(result)-1, value)
+
+    return result[:value]
 
 def HeadToHead(fullname1: str, fullname2: str):              #Статистика личных встреч между двумя игроками
     fullname = [fullname1, fullname2]
-    df_list_match = pd.read_excel("../data/Список матчей.xlsx")
+    df_list_match = pd.read_excel("data\Список матчей.xlsx")
 
     sets = ['Партия 1 1', 'Партия 1 2', 'Партия 2 1', 'Партия 2 2', 'Партия 3 1', 'Партия 3 2', 'Партия 4 1', 'Партия 4 2', 'Партия 5 1', 'Партия 5 2', 'Партия 6 1', 'Партия 6 2', 'Партия 7 1', 'Партия 7 2']
     result = []
