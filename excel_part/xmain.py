@@ -43,7 +43,7 @@ def GetIdByName(surename: str, name: str) -> str:                # ID по им�
     fullname = surename + name
     for i in range(len(df_base)): 
         if str(fullname).replace(' ', '').lower() == str(df_base["Фамилия"].values[i]).lower() + str(df_base["Имя"].values[i]).lower():
-            return df_base["ID"].values[i]
+            return str(int(df_base["ID"].values[i]))
     return 0
 
 
@@ -130,5 +130,3 @@ def CompNameList(num: int) -> str:              # Название соревн�
 df_base = pd.read_excel("data/База.xlsx")
 df_match = pd.read_excel("data/Список матчей.xlsx")
 
-
-print(GetIdByName("Зинчук", "Егор"))
