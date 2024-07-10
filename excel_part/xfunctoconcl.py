@@ -426,11 +426,13 @@ def PlaceInRaitingKOFNT(name: str) -> int:          #НЕТЕСТИЛОСЬ Ме
         x = zip(namesM, raitingM)
         xs = sorted(x, key=lambda k: k[1], reverse=True)
         resultM = [x[0] for x in xs]
-        return resultM.index(name)
+        return resultM.index(name)+1
 
     if xm.GenderBase(xm.GetIdByName(name[0], name[1])) == 'М':
         x = zip(namesW, raitingW)
         xs = sorted(x, key=lambda k: k[1], reverse=True)
         resultW = [x[0] for x in xs]
-        return resultW.index(name)
+        return resultW.index(name)+1
     
+def PlaceAndRaitingOnYear(name: str) -> list:
+    pass
