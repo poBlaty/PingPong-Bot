@@ -2,8 +2,9 @@ import pandas as pd
 
 
 def IsIdInBase(ID: str) -> bool:                #Есть ли в базе такой id
-    if df_base.isin(ID):
-        return True
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return True
     return False
 
 
@@ -130,3 +131,4 @@ def CompNameList(num: int) -> str:              # Название соревн�
 df_base = pd.read_excel("data/База.xlsx")
 df_match = pd.read_excel("data/Список матчей.xlsx")
 
+print(IsIdInBase(6126011940))

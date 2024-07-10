@@ -435,4 +435,13 @@ def PlaceInRaitingKOFNT(name: str) -> int:          #НЕТЕСТИЛОСЬ Ме
         return resultW.index(name)+1
     
 def PlaceAndRaitingOnYear(name: str) -> list:
-    pass
+    df_raiting = pd.read_excel("data/Рейтинг.xlsx")
+
+    l = len(df_raiting['Фамилия'])
+    col = list(df_raiting)
+
+    for i in range(l-1):
+        
+
+    if l < len(col)
+        
