@@ -39,7 +39,7 @@ def NameBase(ID: str) -> str:  # Имя из "База"
             return df_base['Имя'].values[i]
 
 
-def GetIdByName(name: str, surename) -> str:                # ID по имени
+def GetIdByName(surename: str, name: str) -> str:                # ID по имени
     fullname = surename + name
     for i in range(len(df_base)): 
         if str(fullname).replace(' ', '').lower() == str(df_base["Фамилия"].values[i]).lower() + str(df_base["Имя"].values[i]).lower():
@@ -131,4 +131,4 @@ df_base = pd.read_excel("data/База.xlsx")
 df_match = pd.read_excel("data/Список матчей.xlsx")
 
 
-print(GetIdByName("Егор", "Зинчук"))
+print(GetIdByName("Зинчук", "Егор"))
