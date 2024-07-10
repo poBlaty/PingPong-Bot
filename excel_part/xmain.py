@@ -130,5 +130,3 @@ def CompNameList(num: int) -> str:              # Название соревн�
 
 df_base = pd.read_excel("data/База.xlsx")
 df_match = pd.read_excel("data/Список матчей.xlsx")
-
-print(IsIdInBase(6126011940))

@@ -401,47 +401,34 @@ def WinPointsValueYear(year: int, name: str) -> int:           #Количест
 
     return sum
 
-def PlaceInRaitingKOFNT(name: str) -> int:          #НЕТЕСТИЛОСЬ Место игрока в рейтинге КОФНТ в последнем месяце
+def PlaceInRaitingKOFNT(name: str) -> list:          #Рейтинг игрока и Место игрока в рейтинге КОФНТ в последнем месяце
     df_raiting = pd.read_excel("data/Рейтинг.xlsx")
 
     l = len(df_raiting['Фамилия'])
-    col = list(df_raiting)
-    namesM = []
-    raitingM = []
-    namesW = []
-    raitingW = []
-    name = name.split(' ')
+    col = [c for c in df_raiting]
 
-    for i in range(l-1):
-        if xm.GenderBase(xm.GetIdByName(df_raiting['Фамилия'].values[i], df_raiting['Имя'].values[i])) == 'М':
-            namesM.append(f"{df_raiting['Фамилия'].values[i]} {df_raiting['Имя'].values[i]}")
-            raitingM.append(df_raiting[col[-1]].values[i])
+    for i in range(l):
+        if f"{df_raiting['Фамилия'].values[i]} {df_raiting['Имя'].values[i]}" == name:
+            return str(df_raiting[col[-1]].values[i]).split(', ')
 
-    for i in range(l-1):
-        if xm.GenderBase(xm.GetIdByName(df_raiting['Фамилия'].values[i], df_raiting['Имя'].values[i])) == 'Ж':
-            namesM.append(f"{df_raiting['Фамилия'].values[i]} {df_raiting['Имя'].values[i]}")
-            raitingM.append(df_raiting[col[-1]].values[i])
+def YearPlaceInRaitingKOFNT(name: str) -> list:          #Рейтинг игрока и Место игрока в рейтинге КОФНТ за год
+    df_raiting = pd.read_excel("data/Рейтинг.xlsx")
 
-    if xm.GenderBase(xm.GetIdByName(name[0], name[1])) == 'М':
-        x = zip(namesM, raitingM)
-        xs = sorted(x, key=lambda k: k[1], reverse=True)
-        resultM = [x[0] for x in xs]
-        return resultM.index(name)+1
+    l = len(df_raiting['Фамилия'])
+    col = [c for c in df_raiting]
+    result = []
 
-    if xm.GenderBase(xm.GetIdByName(name[0], name[1])) == 'М':
-        x = zip(namesW, raitingW)
-        xs = sorted(x, key=lambda k: k[1], reverse=True)
-        resultW = [x[0] for x in xs]
-        return resultW.index(name)+1
+    if len(col) < 14:
+        for i in range(l):
+            if f"{df_raiting['Фамилия'].values[i]} {df_raiting['Имя'].values[i]}" == name:
+                for j in range(len(col)-2):
+                    result.append(str(df_raiting[col[j+2]].values[i]).split(', '))
+
+    else:
+        for i in range(l):
+            if f"{df_raiting['Фамилия'].values[i]} {df_raiting['Имя'].values[i]}" == name:
+                for j in range(1, 13):
+                    result.append(str(df_raiting[col[-1*j]].values[i]).split(', '))
+
+    return result
     
-def PlaceAndRaitingOnYear(name: str) -> list:
-    df_raiting = pd.read_excel("data/Рейтинг.xlsx")
-
-    l = len(df_raiting['Фамилия'])
-    col = list(df_raiting)
-
-    for i in range(l-1):
-        
-
-    if l < len(col)
-        
