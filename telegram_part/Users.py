@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 import excel_part.xmain as xl
 import excel_part.xfunctoconcl as cl
-# import main as tl
+
 import redis
 
 
@@ -33,7 +33,7 @@ class User:
         return self.id
 
     def choosePlayer(self, name: str, surname: str) -> int:
-        if xl.GetIdByName(name, surname) is None:
+        if xl.GetIdByName(name=name, surename=surname) is None:
             return -1  # not in excel or name or surname are wrong
         self.name = name
         self.surname = surname
@@ -133,20 +133,20 @@ def auntendefication(tid: str) -> (User, Player, Trainer, Admin, User):
         if cash == 'Игрок':
             return Player(tid)
 
-    if xl.IsIdInBase(tid):
-        role = xl.GetRoles(tid)
-        if 'Админ' in role:
-            db.setex(tid, cash_time, 'Админ')  # add to cash
-            return Admin(tid)
-        if 'Тренер' in role:
-            db.setex(tid, cash_time, 'Тренер')
-            return Trainer(tid)
-        if 'Судья' in role:
-            db.setex(tid, cash_time, 'Судья')
-            return Referee(tid)
-        if 'Игрок' in role:
-            db.setex(tid, cash_time, 'Игрок')
-            return Player(tid)
+    # if xl.IsIdInBase(tid):
+    role = xl.GetRoles(tid)
+    if 'Админ' in role:
+        db.setex(tid, cash_time, 'Админ')  # add to cash
+        return Admin(tid)
+    if 'Тренер' in role:
+        db.setex(tid, cash_time, 'Тренер')
+        return Trainer(tid)
+    if 'Судья' in role:
+        db.setex(tid, cash_time, 'Судья')
+        return Referee(tid)
+    if 'Игрок' in role:
+        db.setex(tid, cash_time, 'Игрок')
+        return Player(tid)
 
     return User(tid)
 
@@ -164,17 +164,19 @@ def signIn(tid: str, username: str = None, name: str = None, phone_number: str =
 
 
 def auth(func):
-    async def inner(*args):
-        # user = auntendefication(args)
-        return await func(args)
+    def inner(message, _):
+        user = auntendefication(str(message.from_user.id))
+        # print(user)
+        return func(tid=message, user=user)
 
     return inner
 
 
 if __name__ == '__main__':
     # r.set('foo', 'baar')
-    # print(db.get(123))
-
-    user = User('1134175573')
-    user.choosePlayer('Егор', 'Зинчук')
-    pprint.pprint(user.bestWins())
+    print(db.get('1134175573'))
+    # user = User('1134175573')
+    user = auntendefication('1134175573') # '6126011940'
+    print(user)
+    # user.choosePlayer('Егор', 'Зинчук')
+    # pprint.pprint(user.bestWins())

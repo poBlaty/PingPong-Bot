@@ -26,7 +26,9 @@ dp = Dispatcher()
 
 @auth
 @dp.message(Command("start"))
-async def cmd_start(message: types.Message, user: User): #, user: User
+async def cmd_start(message: types.Message, user: User = None):
+    print(user.__class__)
+
     kb = [
         [types.KeyboardButton(text="профиль")],
         [types.KeyboardButton(text="Рейтинг")],
