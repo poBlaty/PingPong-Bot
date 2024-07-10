@@ -2,8 +2,9 @@ import pandas as pd
 
 
 def IsIdInBase(ID: str) -> bool:                #Есть ли в базе такой id
-    if df_base.isin(ID):
-        return True
+    for i in range(len(df_base)):
+        if ID == df_base["ID"].values[i]:
+            return True
     return False
 
 
@@ -23,7 +24,7 @@ def FindByRole(role: str) -> list:
     id = []
     for i in range(len(df_base)):
         if df_base[role].values[i] == 1:
-            id.append(df_base["ID"].values[i])
+            id.append(int(df_base["ID"].values[i]))
     return id
 
 
@@ -127,11 +128,7 @@ def CompNameList(num: int) -> str:              # Название соревн�
     return df_match['Название соревнований'].values[num]
 
 
-df_base = pd.read_excel("../data/База.xlsx")
-df_match = pd.read_excel("../data/Список матчей.xlsx")
+df_base = pd.read_excel("data/База.xlsx")
+df_match = pd.read_excel("data/Список матчей.xlsx")
 
-# print(GetIdByName("Егор", "Зинчук"))
-
-if __name__ == '__main__':
-    df_base.isin('6126011940')
-    # print(IsIdInBase('6126011940'))
+# print(IsIdInBase(6126011940))

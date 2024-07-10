@@ -61,7 +61,7 @@ def LastComp(name: str) -> list:                             #Результат
     return result
 
 def BestWins(name: str, value: int) -> list:                            #Лучшие победы
-    df_list_match = pd.read_excel("data/Список матчей.xlsx")
+    df_list_match = pd.read_excel("data\Список матчей.xlsx")
 
     sets = ['Партия 1 1', 'Партия 1 2', 'Партия 2 1', 'Партия 2 2', 'Партия 3 1', 'Партия 3 2', 'Партия 4 1', 'Партия 4 2', 'Партия 5 1', 'Партия 5 2', 'Партия 6 1', 'Партия 6 2', 'Партия 7 1', 'Партия 7 2']
     result = []
@@ -131,7 +131,7 @@ def BestWins(name: str, value: int) -> list:                            #Луч�
 
 def HeadToHead(fullname1: str, fullname2: str) -> list:              #Статистика личных встреч между двумя игроками
     fullname = [fullname1, fullname2]
-    df_list_match = pd.read_excel("data/Список матчей.xlsx")
+    df_list_match = pd.read_excel("data\Список матчей.xlsx")
 
     sets = ['Партия 1 1', 'Партия 1 2', 'Партия 2 1', 'Партия 2 2', 'Партия 3 1', 'Партия 3 2', 'Партия 4 1', 'Партия 4 2', 'Партия 5 1', 'Партия 5 2', 'Партия 6 1', 'Партия 6 2', 'Партия 7 1', 'Партия 7 2']
     result = []
@@ -434,5 +434,14 @@ def WinPointsValueYear(year: int, name: str) -> int:           #Количест
 #         resultW = [x[0] for x in xs]
 #         return resultW.index(name)+1
     
-def PlaceAndRaitingOnYear(name: str) -> list:
-    pass
+# def PlaceAndRaitingOnYear(name: str) -> list:
+#     df_raiting = pd.read_excel("data/Рейтинг.xlsx")
+#
+#     l = len(df_raiting['Фамилия'])
+#     col = list(df_raiting)
+#
+#     for i in range(l-1):
+#
+#
+#     if l < len(col)
+        
