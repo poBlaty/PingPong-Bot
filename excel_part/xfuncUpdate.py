@@ -23,7 +23,7 @@ def RaitingFileUpdate(link: str):  # Обновление файла "Рейти
             df_base.at[b + i, 'Имя'] = three[i].split(' ')[1]
             for j in range(l):
                 if df_raiting_new_m['Фамилия Имя'].values[j] == three[i]:
-                    df_base.at[b + i, month] = df_raiting_new_m['Рейтинг'].values[j]
+                    df_base.at[b + i, month] = f"{df_raiting_new_m['Рейтинг'].values[j]}, {df_raiting_new_m['Место'].values[j]}"
 
     for i in range(l):
         surename = df_raiting_new_m['Фамилия Имя'].values[i].split(' ')[0]
@@ -31,10 +31,11 @@ def RaitingFileUpdate(link: str):  # Обновление файла "Рейти
         name = df_raiting_new_m['Фамилия Имя'].values[i].split(' ')[1]
         name = name.replace(' ', '')
         raiting = df_raiting_new_m['Рейтинг'].values[i]
+        place = df_raiting_new_m["Место"].values[i]
 
         for j in range(b - len(three)):
             if f"{surename} {name}" == f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}":
-                df_base.at[j, month] = raiting
+                df_base.at[j, month] = f"{raiting}, {place}"
                 continue
 
     df_base.to_excel("data/Рейтинг.xlsx", index=False)
@@ -95,7 +96,7 @@ def RaitingFNTRUpdate(link: str):  # Обновление файла "База" 
         raiting = df_raiting_new_m['Рейтинг'].values[i]
 
         for j in range(b - len(three)):
-            if f"{surename} {name}" == f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}":
+            if f"{surename} {name}" == f"{df_base['Фамилия'][j]} {df_base['Имя'][j]}" and df_raiting_new_m["Субъект РФ"].values[i] == 'Калининградская область':
                 df_base.at[j, "Рейтинг ФНТР"] = raiting
                 continue
     df_base.to_excel("data/База.xlsx", index=False)
@@ -307,3 +308,4 @@ def ListMatchUpdate(link: str):  # Обновление файла Список 
             df_list_match.at[l + j, 'Общий счет'] = f"{matchesFinal[j][3]}:{matchesFinal[j][4]}"
 
         df_list_match.to_excel("data/Список матчей.xlsx", index=False)
+
