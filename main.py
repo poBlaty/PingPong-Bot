@@ -54,7 +54,6 @@ async def cmd_start(message: types.Message):
 async def cmd_start(message: types.Message):
     wb = [
         [types.KeyboardButton(text="Архив")],
-        [types.KeyboardButton(text="судейский корпус")],
         [types.KeyboardButton(text="Уважаемые люди")],
         [types.KeyboardButton(text="Общая стата")],
         [types.KeyboardButton(text="На главную")]
@@ -80,7 +79,7 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True,
         input_field_placeholder="выбирите пункт меню:"
     )
-    await message.answer("конкретику пж", reply_markup=keyboard)
+    await message.answer("Выберите:", reply_markup=keyboard)
 
 
 @dp.message(F.text.lower() == "результаты")
@@ -93,11 +92,40 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True,
         input_field_placeholder="выбирите пункт меню:"
     )
-    await message.answer("BlueLock 4 - 3 U20", reply_markup=keyboard)
+    await message.answer_document(document=FSInputFile(
+        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 20 лет.pdf"), reply_markup=keyboard)
+    await message.answer_document(document=FSInputFile(
+        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 16 лет.pdf"), reply_markup=keyboard)
+    await message.answer_document(document=FSInputFile(
+        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 14 лет.pdf"), reply_markup=keyboard)
+    await message.answer_document(document=FSInputFile(
+        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 12 лет.pdf"), reply_markup=keyboard)
+
+
+@dp.callback_query(F.data == "docs")
+async def send_random_value(callback: types.CallbackQuery):
+    await callback.message.answer_document(document=FSInputFile(
+        "data/КОФНТ/Архив/Документы федерации/Протокол общего собрания членов РФСОО КОФНТ 21.11.2023.pdf"))
+    await callback.message.answer_document(document=FSInputFile(
+        "data/КОФНТ/Архив/Документы федерации/Протокол общего собрания членов РФСОО КОФНТ 30.05.2024.pdf"))
 
 
 @dp.message(F.text.lower() == "документы федерации")
 async def cmd_start(message: types.Message):
+    builder = InlineKeyboardBuilder()
+    builder.add(types.InlineKeyboardButton(
+        text="Подготовка файла к турниру",
+        callback_data="docs")
+    )
+    builder.add(types.InlineKeyboardButton(
+        text="Переход на гугл форму",
+        url='https://docs.google.com/forms/d/1UiUhwl51Ci4BRPoYXwXxwwWHarH-nI5qYwMj7bBUZg8/closedform',
+        callback_data="random_value2")
+    )
+    await message.answer(
+        "здесь реализуется запись на турнир!",
+        reply_markup=builder.as_markup()
+    )
     wb = [
         [types.KeyboardButton(text="На главную")]
     ]
@@ -106,7 +134,6 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True,
         input_field_placeholder="выбирите пункт меню:"
     )
-    await message.answer("все официально", reply_markup=keyboard)
 
 
 @dp.message(F.text.lower() == "уважаемые люди")
@@ -150,21 +177,6 @@ async def cmd_start(message: types.Message):
     await message.answer("все проигрываем в нулину", reply_markup=keyboard)
 
 
-@dp.message(F.text.lower() == "судейский корпус")
-async def cmd_start(message: types.Message):
-    wb = [
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
-    )
-    await message.answer("судей на мыло", reply_markup=keyboard)
-
-
-
-
 # @dp.message(F.data == "профиль")
 # def ApplyToRegistraition(message: types.Message):
 
@@ -189,10 +201,10 @@ async def cmd_start(message: types.Message):
             text="зарегистрироваться",
             callback_data="reg")
         )
-        builder.add(types.InlineKeyboardButton(
-            text="выбор игрока",
-            callback_data="random_value2")
-        )
+        # builder.add(types.InlineKeyboardButton(
+        #     text="выбор игрока",
+        #     callback_data="random_value2")
+        # )
         await message.answer(
             "Вы не зарегистрированы \nВыберете пункт меню",
             reply_markup=builder.as_markup()
@@ -203,12 +215,12 @@ async def cmd_start(message: types.Message):
             text="Мои матчи",
             callback_data="random_value3")
         )
-        builder.add(types.InlineKeyboardButton(
-            text="выбор игрока",
-            callback_data="random_value2")
-        )
+        # builder.add(types.InlineKeyboardButton(
+        #     text="выбор игрока",
+        #     callback_data="random_value2")
+        # )
         await message.answer(
-            f"Здравствуйте! {user.surname} {user.name}\n"
+            f"Имя: {user.surname} {user.name}\n"
             f"Год рождения: {procfile.year}\n"
             f"Пол: {procfile.gender}\n"
             f"KOFNT: {procfile.rateKOFNT}\n"
@@ -217,14 +229,9 @@ async def cmd_start(message: types.Message):
             reply_markup=builder.as_markup()
         )
 
-router = Router()
-class WriteName(StatesGroup):
-    writes_name = State()
 
-@router.message
 @dp.callback_query(F.data == "random_value2")
 async def send_random_value(callback: types.CallbackQuery):
-
     wb = [
         [types.KeyboardButton(text="его матчи")],
         [types.KeyboardButton(text="топ 10")],
@@ -325,7 +332,6 @@ async def cmd_start(message: types.Message):
     await message.answer("топ 1: атон аранов\n и тд", reply_markup=keyboard)
 
 
-
 # Рейтинг
 @dp.message(F.text.lower() == "рейтинг")
 async def cmd_start(message: types.Message):
@@ -340,24 +346,30 @@ async def cmd_start(message: types.Message):
     await message.answer("топ 1: атон аранов\n и тд", reply_markup=keyboard)
 
 
+@dp.callback_query(F.data == "fileToTour")
+async def send_random_value(callback: types.CallbackQuery):
+    await callback.message.answer("Подождите файл грузится...")
+    await callback.message.answer_document(document=FSInputFile(
+        "data/Список соревы/Чемп. КО.xlsm"))
+
+
 # Запись на турнир
 @dp.message(F.text.lower() == "запись на турнир")
 async def cmd_random(message: types.Message):
     builder = InlineKeyboardBuilder()
     builder.add(types.InlineKeyboardButton(
         text="Подготовка файла к турниру",
-        url='https://youtu.be/m4QO5jyEw2E?si=WIw64UEkKjZfHY_t',
-        callback_data="random_value1")
+        callback_data="fileToTour")
     )
     builder.add(types.InlineKeyboardButton(
         text="Переход на гугл форму",
-        url='https://www.youtube.com/watch?v=r0k5CxR0pys&t=337s&ab_channel=CoupleGuys',
-        callback_data="random_value2")
+        url='https://docs.google.com/forms/d/1UiUhwl51Ci4BRPoYXwXxwwWHarH-nI5qYwMj7bBUZg8/closedform')
     )
     await message.answer(
         "здесь реализуется запись на турнир!",
         reply_markup=builder.as_markup()
     )
+
 
 # на главную
 @dp.message(F.text.lower() == "на главную")
@@ -380,9 +392,9 @@ async def cmd_start(message: types.Message):
 
 
 # id and username
-@dp.message(Command("id"))
-async def start(msg: types.Message):
-    await bot.send_message(msg.from_user.id, msg.from_user.first_name)
+# @dp.message(Command("id"))
+# async def start(msg: types.Message):
+#     await bot.send_message(msg.from_user.id, msg.from_user.first_name)
 
 
 # @dp.message(Command("username"))
@@ -399,7 +411,8 @@ async def start(msg: types.Message):
 @dp.callback_query(F.data == "Approve")
 async def send_random_value(callback: types.CallbackQuery):
     await callback.message.answer("Добре, давай админчик добавь его id в Excel ты справишься!X)")
-    #надо подумать как сделать так чтобы после нажатия кнопки оно добавляло пользователя в ексель
+    # надо подумать как сделать так чтобы после нажатия кнопки оно добавляло пользователя в ексель
+
 
 # async def applicationMessageToAdmin():
 #     builder = InlineKeyboardBuilder()
@@ -415,7 +428,6 @@ async def send_random_value(callback: types.CallbackQuery):
 #
 # async def sendToUser(tid, text):
 #     await bot.send_message(tid, text)
-
 
 
 # Запуск процесса поллинга новых апдейтов

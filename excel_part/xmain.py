@@ -75,7 +75,7 @@ def BirthdayBase(ID: str) -> str:  # Дата рождения из "База"
 def СategoryBase(ID: str) -> str:  # Разряд из "База"
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
-            return df_base['Дата рождения'].values[i]
+            return df_base['Разряд'].values[i]
 
 
 def CityBase(ID: str) -> str:  # Город из "База"
