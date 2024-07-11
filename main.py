@@ -96,8 +96,27 @@ async def cmd_start(message: types.Message):
     await message.answer("BlueLock 4 - 3 U20", reply_markup=keyboard)
 
 
+@dp.callback_query(F.data == "docs")
+async def send_random_value(callback: types.CallbackQuery):
+    with open("data/КОФНТ/Судейский корпус/Список судей 2024.pdf", 'rb') as f: # Список судей 2024.pdf
+        await callback.message.answer_document(f)
+
 @dp.message(F.text.lower() == "документы федерации")
 async def cmd_start(message: types.Message):
+    builder = InlineKeyboardBuilder()
+    builder.add(types.InlineKeyboardButton(
+        text="Подготовка файла к турниру",
+        callback_data="docs")
+    )
+    builder.add(types.InlineKeyboardButton(
+        text="Переход на гугл форму",
+        url='https://docs.google.com/forms/d/1UiUhwl51Ci4BRPoYXwXxwwWHarH-nI5qYwMj7bBUZg8/closedform',
+        callback_data="random_value2")
+    )
+    await message.answer(
+        "здесь реализуется запись на турнир!",
+        reply_markup=builder.as_markup()
+    )
     wb = [
         [types.KeyboardButton(text="На главную")]
     ]
@@ -106,7 +125,7 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True,
         input_field_placeholder="выбирите пункт меню:"
     )
-    await message.answer("все официально", reply_markup=keyboard)
+    # await message.answer("все официально", reply_markup=keyboard)
 
 
 @dp.message(F.text.lower() == "уважаемые люди")
@@ -217,11 +236,7 @@ async def cmd_start(message: types.Message):
             reply_markup=builder.as_markup()
         )
 
-router = Router()
-class WriteName(StatesGroup):
-    writes_name = State()
 
-@router.message
 @dp.callback_query(F.data == "random_value2")
 async def send_random_value(callback: types.CallbackQuery):
 
