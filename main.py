@@ -61,7 +61,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer("в это разделе вы можете получить подробную информацию о Калининградской \
     областной федерации настольного тенниса.", reply_markup=keyboard)
@@ -77,7 +77,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer("Выберите:", reply_markup=keyboard)
 
@@ -90,7 +90,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer_document(document=FSInputFile(
         "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 20 лет.pdf"), reply_markup=keyboard)
@@ -109,6 +109,11 @@ async def send_random_value(callback: types.CallbackQuery):
     await callback.message.answer_document(document=FSInputFile(
         "data/КОФНТ/Архив/Документы федерации/Протокол общего собрания членов РФСОО КОФНТ 30.05.2024.pdf"))
 
+
+@dp.callback_query(F.data == "docs")
+async def send_random_value(callback: types.CallbackQuery):
+    with open("data/КОФНТ/Судейский корпус/Список судей 2024.pdf", 'rb') as f: # Список судей 2024.pdf
+        await callback.message.answer_document(f)
 
 @dp.message(F.text.lower() == "документы федерации")
 async def cmd_start(message: types.Message):
@@ -134,6 +139,8 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True,
         input_field_placeholder="выбирите пункт меню:"
     )
+
+    # await message.answer("все официально", reply_markup=keyboard)
 
 
 @dp.message(F.text.lower() == "уважаемые люди")
@@ -241,7 +248,7 @@ async def send_random_value(callback: types.CallbackQuery):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await callback.message.answer("что вы хотите узнать о человеке", reply_markup=keyboard)
 
@@ -254,7 +261,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer("матчи были улет", reply_markup=keyboard)
 
@@ -267,7 +274,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer("играет против баранова", reply_markup=keyboard)
 
@@ -283,7 +290,7 @@ async def send_random_value(callback: types.CallbackQuery):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await callback.message.answer("что вы хотите узнать о себе", reply_markup=keyboard)
 
@@ -296,7 +303,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer("ты молодец", reply_markup=keyboard)
 
@@ -309,7 +316,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer("играю против всех\n будет реализовано в следующем обновлении", reply_markup=keyboard)
 
@@ -327,7 +334,7 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="выберите пункт меню:"
     )
     await message.answer("топ 1: атон аранов\n и тд", reply_markup=keyboard)
 
@@ -390,23 +397,6 @@ async def cmd_start(message: types.Message):
       предоставленных, чтобы получить нужную для вас информацию.\n❗ Я ругаюсь матом! Если тебя это не\
        устраивает – не пользуйся ботом", reply_markup=keyboard)
 
-
-# id and username
-# @dp.message(Command("id"))
-# async def start(msg: types.Message):
-#     await bot.send_message(msg.from_user.id, msg.from_user.first_name)
-
-
-# @dp.message(Command("username"))
-# async def get_username(message: types.Message):
-#     username = message.from_user.username
-#     await message.answer(f"{username}")
-#
-#
-# @dp.message(Command("userid"))
-# async def getuserid(message: types.Message):
-#     user_id = message.from_user.id
-#     await message.answer(f"{user_id}")
 
 @dp.callback_query(F.data == "Approve")
 async def send_random_value(callback: types.CallbackQuery):
