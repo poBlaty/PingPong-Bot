@@ -1,11 +1,10 @@
 import asyncio
 import logging
 
-import redis
-from aiogram.fsm.state import StatesGroup, State
+import os
 
 from telegram_part.config import TOKEN
-from telegram_part.Users import Admin, Player, User, Referee, Trainer
+from telegram_part.Users import Admin, Player, User, Referee, Trainer, PlaceInRating, UserRating, Competition
 from telegram_part.Users import auntendefication
 from aiogram import Bot, Dispatcher, types, Router
 from aiogram.filters.command import Command, Message
@@ -14,8 +13,6 @@ from aiogram.types import ReplyKeyboardRemove, KeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardMarkup
 from aiogram.utils.markdown import hide_link
 from aiogram.types import FSInputFile, Message
-from aiogram.utils.media_group import MediaGroupBuilder
-from aiogram.types import InputFile
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
@@ -32,21 +29,40 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
+    user = auntendefication(message.from_user.id)
     kb = [
-        [types.KeyboardButton(text="профиль")],
-        [types.KeyboardButton(text="Рейтинг")],
+        [types.KeyboardButton(text="Профиль")],
         [types.KeyboardButton(text="Запись на турнир")],
         [types.KeyboardButton(text="КОФНТ")]
     ]
+    if user.__class__ != User:
+        kb.insert(2, [types.KeyboardButton(text="Рейтинг")])
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=kb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="Выберите пункт меню:"
     )
-    await message.answer("Привет! Я бот Калининградской областной федерации настольного тенниса,\
-     могу выполнять различные функции, которые помогут вашей спортивной карьере!\nВыберете пункт из\
-      предоставленных, чтобы получить нужную для вас информацию.\n❗ Я ругаюсь матом! Если тебя это не\
-       устраивает – не пользуйся ботом", reply_markup=keyboard)
+    await message.answer("Привет! Я бот Калининградской областной федерации настольного тенниса,"
+                         "могу выполнять различные функции, которые помогут вашей спортивной карьере!\nВыберете пункт из"
+                         "предоставленных, чтобы получить нужную для вас информацию.❗\n", reply_markup=keyboard)
+
+
+@dp.message(F.text.lower() == "на главную")
+async def cmd_start(message: types.Message):
+    user = auntendefication(message.from_user.id)
+    kb = [
+        [types.KeyboardButton(text="Профиль")],
+        [types.KeyboardButton(text="Запись на турнир")],
+        [types.KeyboardButton(text="КОФНТ")]
+    ]
+    if user.__class__ != User:
+        kb.insert(2, [types.KeyboardButton(text="Рейтинг")])
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+        input_field_placeholder="Выберите пункт меню:"
+    )
+    await message.answer("Главные функции:", reply_markup=keyboard)
 
 
 # КОФНТ
@@ -54,96 +70,34 @@ async def cmd_start(message: types.Message):
 async def cmd_start(message: types.Message):
     wb = [
         [types.KeyboardButton(text="Архив")],
-        [types.KeyboardButton(text="Уважаемые люди")],
-        [types.KeyboardButton(text="Общая стата")],
+        [types.KeyboardButton(text="Управление")],
+        [types.KeyboardButton(text="Общая статистика")],
         [types.KeyboardButton(text="На главную")]
     ]
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
+        input_field_placeholder="Выберите пункт меню:"
     )
-    await message.answer("в это разделе вы можете получить подробную информацию о Калининградской \
-    областной федерации настольного тенниса.", reply_markup=keyboard)
+    await message.answer("В это разделе вы можете получить подробную информацию о КОФНТ.", reply_markup=keyboard)
 
 
 @dp.message(F.text.lower() == "архив")
 async def cmd_start(message: types.Message):
     wb = [
-        [types.KeyboardButton(text="результаты")],
-        [types.KeyboardButton(text="документы федерации")],
+        [types.KeyboardButton(text="Результаты соревнований")],
+        [types.KeyboardButton(text="Документы федерации")],
         [types.KeyboardButton(text="На главную")]
     ]
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
+        input_field_placeholder="Выберите пункт меню:"
     )
     await message.answer("Выберите:", reply_markup=keyboard)
 
 
-@dp.message(F.text.lower() == "результаты")
-async def cmd_start(message: types.Message):
-    wb = [
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
-    )
-    await message.answer_document(document=FSInputFile(
-        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 20 лет.pdf"), reply_markup=keyboard)
-    await message.answer_document(document=FSInputFile(
-        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 16 лет.pdf"), reply_markup=keyboard)
-    await message.answer_document(document=FSInputFile(
-        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 14 лет.pdf"), reply_markup=keyboard)
-    await message.answer_document(document=FSInputFile(
-        "data/КОФНТ/Архив/Результаты соревнований/2024/Перв. КО до 12 лет.pdf"), reply_markup=keyboard)
-
-
-@dp.callback_query(F.data == "docs")
-async def send_random_value(callback: types.CallbackQuery):
-    await callback.message.answer_document(document=FSInputFile(
-        "data/КОФНТ/Архив/Документы федерации/Протокол общего собрания членов РФСОО КОФНТ 21.11.2023.pdf"))
-    await callback.message.answer_document(document=FSInputFile(
-        "data/КОФНТ/Архив/Документы федерации/Протокол общего собрания членов РФСОО КОФНТ 30.05.2024.pdf"))
-
-
-@dp.callback_query(F.data == "docs")
-async def send_random_value(callback: types.CallbackQuery):
-    with open("data/КОФНТ/Судейский корпус/Список судей 2024.pdf", 'rb') as f: # Список судей 2024.pdf
-        await callback.message.answer_document(f)
-
-@dp.message(F.text.lower() == "документы федерации")
-async def cmd_start(message: types.Message):
-    builder = InlineKeyboardBuilder()
-    builder.add(types.InlineKeyboardButton(
-        text="Подготовка файла к турниру",
-        callback_data="docs")
-    )
-    builder.add(types.InlineKeyboardButton(
-        text="Переход на гугл форму",
-        url='https://docs.google.com/forms/d/1UiUhwl51Ci4BRPoYXwXxwwWHarH-nI5qYwMj7bBUZg8/closedform',
-        callback_data="random_value2")
-    )
-    await message.answer(
-        "здесь реализуется запись на турнир!",
-        reply_markup=builder.as_markup()
-    )
-    wb = [
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
-    )
-
-    # await message.answer("все официально", reply_markup=keyboard)
-
-
-@dp.message(F.text.lower() == "уважаемые люди")
+@dp.message(F.text.lower() == "управление")
 async def cmd_start(message: types.Message):
     text = (f"Президент РФСОО КОФТН — Георгий Рубинштейн\n\n"
             f"Исполнительный директор  — Олеся Скаленко\n\n"
@@ -166,12 +120,12 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="Выберите пункт меню:"
     )
     await message.answer(text, reply_markup=keyboard)
 
 
-@dp.message(F.text.lower() == "общая стата")
+@dp.message(F.text.lower() == "общая статистика")
 async def cmd_start(message: types.Message):
     wb = [
         [types.KeyboardButton(text="На главную")]
@@ -179,9 +133,87 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="Выберите пункт меню:"
     )
-    await message.answer("все проигрываем в нулину", reply_markup=keyboard)
+    data = Admin.getCommonData()
+
+    await message.answer(f"Статистика КОФНТ за 2024-й год:\n"
+                         f"Всего было сыграно {data.comps} соревнований\n"
+                         f"На них игроки разыграли:\n"
+                         f"{data.matches} матчей, {data.sets} партий, {data.points} очков", reply_markup=keyboard)
+
+
+@dp.callback_query(F.data == "result")
+async def send_random_value(callback: types.CallbackQuery):
+    await callback.message.answer("Подождите немного, файл грузится...")
+    count = 0
+    for i in os.listdir("data/КОФНТ/Архив/Результаты соревнований/2024"):
+        if count < 3:
+            await callback.message.answer_document(document=FSInputFile(
+                f"data/КОФНТ/Архив/Результаты соревнований/2024/{i}"))
+
+
+@dp.message(F.text.lower() == "результаты соревнований")
+async def cmd_start(message: types.Message):
+    user = auntendefication(message.from_user.id)
+    builder = InlineKeyboardBuilder()
+    if user.__class__ is Admin:
+        builder.add(types.InlineKeyboardButton(
+            text="Залить файлы",
+            callback_data="result")
+        )
+    builder.add(types.InlineKeyboardButton(
+        text="Получить результаты",
+        callback_data="result")
+    )
+    await message.answer(
+        "Результаты соревнования",
+        reply_markup=builder.as_markup()
+    )
+    wb = [
+        [types.KeyboardButton(text="На главную")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=wb,
+        resize_keyboard=True,
+        input_field_placeholder="выберите пункт меню:"
+    )
+
+
+@dp.callback_query(F.data == "docs")
+async def send_random_value(callback: types.CallbackQuery):
+    for i in os.listdir("data/КОФНТ/Архив/Документы федерации"):
+        await callback.message.answer_document(document=FSInputFile(
+            f"data/КОФНТ/Архив/Документы федерации/{i}"))
+
+
+@dp.message(F.text.lower() == "документы федерации")
+async def cmd_start(message: types.Message):
+    user = auntendefication(message.from_user.id)
+    builder = InlineKeyboardBuilder()
+    if user.__class__ is Admin:
+        builder.add(types.InlineKeyboardButton(
+            text="Залить файлы",
+            callback_data="docs")
+        )
+    builder.add(types.InlineKeyboardButton(
+        text="Получить документы",
+        callback_data="docs")
+    )
+    await message.answer(
+        "Документы федерации",
+        reply_markup=builder.as_markup()
+    )
+    wb = [
+        [types.KeyboardButton(text="На главную")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=wb,
+        resize_keyboard=True,
+        input_field_placeholder="Выберите пункт меню:"
+    )
+
+    # await message.answer("все официально", reply_markup=keyboard)
 
 
 # @dp.message(F.data == "профиль")
@@ -195,6 +227,68 @@ async def cmd_start(message: types.Message):
 #
 #     await callback.message.answer("напишите свою имя фамилию и номер телефона через пробел")
 
+@dp.message(F.text.lower() == "лучшие матчи")
+async def cmd_start(message: types.Message):
+    user = auntendefication(message.from_user.id)  # message.from_user.id
+    wb = [
+        [types.KeyboardButton(text="На главную")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=wb,
+        resize_keyboard=True,
+        input_field_placeholder="выберите пункт меню:"
+    )
+
+    if user.__class__ in (Player, Admin):
+        matches = user.getbestWins()
+        text = f"Лучшие матчи {user.surname + ' ' + user.name}:\n\n"
+        for i in matches:
+            text += (f"{i.name}\n"
+                     f"{i.player_1} {i.rating_1} {i.score} {i.rating_2} {i.player_2} {i.result_parties}\n\n")
+        await message.answer(text, reply_markup=keyboard)
+    else:
+        await message.answer("У вас нема доступа Ж(", reply_markup=keyboard)
+
+
+@dp.message(F.text.lower() == "последние матчи")
+async def cmd_start(message: types.Message):
+    user = auntendefication(message.from_user.id)
+
+    wb = [
+        [types.KeyboardButton(text="На главную")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=wb,
+        resize_keyboard=True,
+        input_field_placeholder="Выберите пункт меню:"
+    )
+
+    if user.__class__ in (Player, Admin):
+        comp: Competition = user.getLastMatches()
+        text = (f'Последние матчи {user.surname + " " + user.name}:\n\n'
+                f'{comp.name} \n\n')
+        for i in comp.plays:
+            text += f"{i.player_1} {i.score} {i.player_2} {i.result_parties}\n"
+        await message.answer(text, reply_markup=keyboard)
+    else:
+        await message.answer("У вас нема доступа Ж(", reply_markup=keyboard)
+
+
+# @dp.callback_query(F.data == "my_matches")
+# async def send_random_value(callback: types.CallbackQuery):
+#     wb = [
+#         [types.KeyboardButton(text="Последние матчи")],
+#         [types.KeyboardButton(text="Топ 10")],
+#         # [types.KeyboardButton(text="против кого играю")],
+#         [types.KeyboardButton(text="На главную")]
+#     ]
+#     keyboard = types.ReplyKeyboardMarkup(
+#         keyboard=wb,
+#         resize_keyboard=True,
+#         input_field_placeholder="Выберите пункт меню:"
+#     )
+#     await callback.message.answer("Что вы хотите узнать о себе", reply_markup=keyboard)
+
 
 @dp.message(F.text.lower() == "профиль")
 async def cmd_start(message: types.Message):
@@ -202,10 +296,10 @@ async def cmd_start(message: types.Message):
 
     user = auntendefication(message.from_user.id)
     ApplyToRegistraition = user.isUserSignIn()
-
+    print(ApplyToRegistraition)
     if ApplyToRegistraition is False:
         builder.add(types.InlineKeyboardButton(
-            text="зарегистрироваться",
+            text="Зарегистрироваться",
             callback_data="reg")
         )
         # builder.add(types.InlineKeyboardButton(
@@ -218,52 +312,47 @@ async def cmd_start(message: types.Message):
         )
     if ApplyToRegistraition is True:
         procfile = user.getProcfile()
-        builder.add(types.InlineKeyboardButton(
-            text="Мои матчи",
-            callback_data="random_value3")
+        wb = [
+            [types.KeyboardButton(text="Последние матчи")],
+            [types.KeyboardButton(text="Лучшие матчи")],
+            # [types.KeyboardButton(text="против кого играю")],
+            [types.KeyboardButton(text="На главную")]
+        ]
+        keyboard = types.ReplyKeyboardMarkup(
+            keyboard=wb,
+            resize_keyboard=True,
+            input_field_placeholder="Выберите пункт меню:"
         )
+        await message.answer("Что вы хотите узнать о себе", reply_markup=keyboard)
         # builder.add(types.InlineKeyboardButton(
         #     text="выбор игрока",
         #     callback_data="random_value2")
         # )
         await message.answer(
-            f"Имя: {user.surname} {user.name}\n"
-            f"Год рождения: {procfile.year}\n"
+            f"ФИ: {user.surname} {user.name}\n"
+            f"Дата рождения: {procfile.year}\n"
             f"Пол: {procfile.gender}\n"
-            f"KOFNT: {procfile.rateKOFNT}\n"
-            f"FNTR: {procfile.rateFNTR}\n"
-            f"Категория: {procfile.category}",
+            f"КОФНТ: {procfile.rateKOFNT} ({procfile.place})\n"
+            f"ФНТР: {procfile.rateFNTR}\n"
+            f"Категория: {procfile.category} разряд",
             reply_markup=builder.as_markup()
         )
 
 
-@dp.callback_query(F.data == "random_value2")
-async def send_random_value(callback: types.CallbackQuery):
-    wb = [
-        [types.KeyboardButton(text="его матчи")],
-        [types.KeyboardButton(text="топ 10")],
-        [types.KeyboardButton(text="против кого он играет")],
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
-    )
-    await callback.message.answer("что вы хотите узнать о человеке", reply_markup=keyboard)
-
-
-@dp.message(F.text.lower() == "его матчи")
-async def cmd_start(message: types.Message):
-    wb = [
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
-    )
-    await message.answer("матчи были улет", reply_markup=keyboard)
+# @dp.callback_query(F.data == "random_value2")
+# async def send_random_value(callback: types.CallbackQuery):
+#     wb = [
+#         [types.KeyboardButton(text="Его матчи")],
+#         [types.KeyboardButton(text="Топ 10")],
+#         [types.KeyboardButton(text="Против кого он играет")],
+#         [types.KeyboardButton(text="На главную")]
+#     ]
+#     keyboard = types.ReplyKeyboardMarkup(
+#         keyboard=wb,
+#         resize_keyboard=True,
+#         input_field_placeholder="Выберите пункт меню:"
+#     )
+#     await callback.message.answer("Что вы хотите узнать о человеке", reply_markup=keyboard)
 
 
 @dp.message(F.text.lower() == "против кого он играет")
@@ -279,23 +368,19 @@ async def cmd_start(message: types.Message):
     await message.answer("играет против баранова", reply_markup=keyboard)
 
 
-@dp.callback_query(F.data == "random_value3")
-async def send_random_value(callback: types.CallbackQuery):
-    wb = [
-        [types.KeyboardButton(text="мои матчи")],
-        [types.KeyboardButton(text="топ 10")],
-        [types.KeyboardButton(text="против кого играю")],
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
-    )
-    await callback.message.answer("что вы хотите узнать о себе", reply_markup=keyboard)
+# @dp.message(F.text.lower() == "против кого играю")
+# async def cmd_start(message: types.Message):
+#     wb = [
+#         [types.KeyboardButton(text="На главную")]
+#     ]
+#     keyboard = types.ReplyKeyboardMarkup(
+#         keyboard=wb,
+#         resize_keyboard=True,
+#         input_field_placeholder="выберите пункт меню:"
+#     )
+#     await message.answer("играю против всех\n будет реализовано в следующем обновлении", reply_markup=keyboard)
 
-
-@dp.message(F.text.lower() == "мои матчи")
+@dp.message(F.text.lower() == "его матчи")
 async def cmd_start(message: types.Message):
     wb = [
         [types.KeyboardButton(text="На главную")]
@@ -303,54 +388,32 @@ async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
+        input_field_placeholder="Выберите пункт меню:"
     )
-    await message.answer("ты молодец", reply_markup=keyboard)
-
-
-@dp.message(F.text.lower() == "против кого играю")
-async def cmd_start(message: types.Message):
-    wb = [
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
-    )
-    await message.answer("играю против всех\n будет реализовано в следующем обновлении", reply_markup=keyboard)
-
-
-@dp.callback_query(F.data == "random_value1")
-async def send_random_value(callback: types.CallbackQuery):
-    await callback.message.answer("напишите свою имя фамилию и номер телефона через пробел")
-
-
-@dp.message(F.text.lower() == "топ 10")
-async def cmd_start(message: types.Message):
-    wb = [
-        [types.KeyboardButton(text="На главную")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=wb,
-        resize_keyboard=True,
-        input_field_placeholder="выберите пункт меню:"
-    )
-    await message.answer("топ 1: атон аранов\n и тд", reply_markup=keyboard)
+    await message.answer("матчи были улет", reply_markup=keyboard)
 
 
 # Рейтинг
 @dp.message(F.text.lower() == "рейтинг")
 async def cmd_start(message: types.Message):
+    user = auntendefication(message.from_user.id)  # 1134175573
     wb = [
         [types.KeyboardButton(text="На главную")]
     ]
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=wb,
         resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
+        input_field_placeholder="Выберите пункт меню:"
     )
-    await message.answer("топ 1: атон аранов\n и тд", reply_markup=keyboard)
+    rating_list = user.getRating()
+    if len(rating_list) == 0:
+        await message.answer("У вас рейтинга нема Ж(")
+    else:
+        await message.answer(f"Рейтинг игрока {user.surname} {user.name} за последние 12 месяцев:",
+                             reply_markup=keyboard)
+        for data in rating_list:
+            await message.answer(
+                f"{data.mouth_year}, Рейтинг: {data.listRaiting.raiting}, Место: {data.listRaiting.place}")
 
 
 @dp.callback_query(F.data == "fileToTour")
@@ -365,37 +428,16 @@ async def send_random_value(callback: types.CallbackQuery):
 async def cmd_random(message: types.Message):
     builder = InlineKeyboardBuilder()
     builder.add(types.InlineKeyboardButton(
-        text="Подготовка файла к турниру",
-        callback_data="fileToTour")
-    )
-    builder.add(types.InlineKeyboardButton(
         text="Переход на гугл форму",
         url='https://docs.google.com/forms/d/1UiUhwl51Ci4BRPoYXwXxwwWHarH-nI5qYwMj7bBUZg8/closedform')
     )
     await message.answer(
-        "здесь реализуется запись на турнир!",
+        "Выберите соревнования для регистрации ниже:",
         reply_markup=builder.as_markup()
     )
 
 
 # на главную
-@dp.message(F.text.lower() == "на главную")
-async def cmd_start(message: types.Message):
-    kb = [
-        [types.KeyboardButton(text="профиль")],
-        [types.KeyboardButton(text="Рейтинг")],
-        [types.KeyboardButton(text="Запись на турнир")],
-        [types.KeyboardButton(text="КОФНТ")]
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-        input_field_placeholder="выбирите пункт меню:"
-    )
-    await message.answer("Я бот Калининградской областной федерации настольного тенниса,\
-     могу выполнять различные функции, которые помогут вашей спортивной карьере!\nВыберете пункт из\
-      предоставленных, чтобы получить нужную для вас информацию.\n❗ Я ругаюсь матом! Если тебя это не\
-       устраивает – не пользуйся ботом", reply_markup=keyboard)
 
 
 @dp.callback_query(F.data == "Approve")

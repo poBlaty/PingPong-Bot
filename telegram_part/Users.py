@@ -10,12 +10,30 @@ import excel_part.xfunctoconcl as cl
 import redis
 
 
+class PlaceInRating(NamedTuple):
+    raiting: int
+    place: int
+
+
+class UserRating(NamedTuple):
+    mouth_year: str
+    listRaiting: PlaceInRating
+
+
 class Procfile(NamedTuple):
     year: str
     gender: str
     rateKOFNT: int
     rateFNTR: int
     category: str
+    place: int
+
+
+class CommonData(NamedTuple):
+    comps: int
+    matches: int
+    sets: int
+    points: int
 
 
 class BestWins(NamedTuple):
@@ -28,23 +46,46 @@ class BestWins(NamedTuple):
     count: str
 
 
+class Match(NamedTuple):
+    player_1: str
+    player_2: str
+    score: str
+    result_parties: str
+
+
+class Competition(NamedTuple):
+    name: str
+    plays: list
+
+
+class BestMatches(NamedTuple):
+    name: str
+    rating_1: int
+    rating_2: int
+    player_1: str
+    player_2: str
+    score: str
+    result_parties: str
+
+
 db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
 
 
 class User:
     id: str
-    name: str
-    surname: str
+    name: str = None
+    surname: str = None
 
     def __init__(self, tid: str):
         self.id = tid
 
     def isUserSignIn(self) -> bool:
-        user = auntendefication(self.id)
-        if user is not User:
+        # user = auntendefication(self.id)
+        # print(user.__class__)
+        if self.__class__ is not User:
             return True  # already reg
 
-        if db.hgetall(self.id) is not None:
+        if len(db.hgetall(self.id)) != 0:
             return True  # in process
         return False
 
@@ -73,21 +114,34 @@ class User:
         self.surname = surname
         return 1
 
-    def bestWins(self):
-        cl.BestWins(self.surname + " " + self.name)
+    def getbestWins(self):
+        data = cl.BestWins(self.surname + " " + self.name, 5)
+        l = []
+        for i in data:
+            if data[0] != i:
+                l.append(BestMatches(name=i[0], player_1=i[1], rating_1=i[2], score=i[3], player_2=i[4], rating_2=i[5],
+                                     result_parties=i[6]))
+        return l
 
-        return cl.BestWins(self.surname + " " + self.name)
+
 
     def getLastMatches(self):
-        return cl.LastComp(self.surname + " " + self.name)
+        data = cl.LastComp(self.surname + " " + self.name)
+        l = []
+        for i in data:
+            if data[0] != i:
+                l.append(Match(player_1=i[0], player_2=i[2], score=i[1],
+                               result_parties=i[3]))
+        return Competition(data[0], l)
 
     def getProcfile(self):
-        bage = xl.BirthdayBase(self.id)
+        age = xl.BirthdayBase(self.id).split('-')
+        bage = f'{age[2]}.{age[1]}.{age[0]}'
         gender = xl.GenderBase(self.id)
-        raiting_1 = xl.RaitingKOFNTBase(self.id)
-        raiting_2 = xl.RaitingFNTRBase(self.id)
+        raiting_FNTR = int(xl.RaitingFNTRBase(self.id))
         category = xl.СategoryBase(self.id)
-        return Procfile(year=bage, gender=gender, rateKOFNT=raiting_1, rateFNTR=raiting_2, category=category)
+        rating, place = cl.PlaceInRaitingKOFNT(self.surname + " " + self.name)
+        return Procfile(year=bage, gender=gender, rateKOFNT=rating, rateFNTR=raiting_FNTR, category=category, place=place)
 
     def getStatistics(self):
         pass
@@ -113,24 +167,20 @@ class User:
     def commonStatistics(self):
         pass
 
-    def archivePDF(self):
-        pass
-
-    def matchResultsPDF(self):
-        pass
-
-    def documentsPDF(self):
-        pass
-
-    def rating(self, range: int = 10):
-        pass
-
 
 class Player(User):
     def __init__(self, tid: str):
         super().__init__(tid)
         self.name = xl.NameBase(tid)
         self.surname = xl.SurenameBase(tid)
+
+    def getRating(self):
+        result = []
+        l = cl.YearPlaceInRaitingKOFNT(self.surname + " " + self.name)
+        for mouth_year, rating_list in l:
+            place = PlaceInRating(raiting=rating_list[0], place=rating_list[1])
+            result.append(UserRating(mouth_year, place))
+        return result
 
 
 class Referee(Player):
@@ -172,6 +222,15 @@ class Admin(Trainer, Referee):
 
     def handleFiles(self):
         pass
+
+    @classmethod
+    def getCommonData(cls):
+        year = 2024
+        comps = cl.CompsValueYear(year=year, name='')
+        matches = cl.MatchValueYear(year=year, name='')
+        sets = cl.SetsValueYear(year=year, name='')
+        points = cl.PointsValueYear(year=year, name='')
+        return CommonData(comps=comps, matches=matches, sets=sets, points=points)
 
 
 def auntendefication(tid: str) -> (User, Player, Trainer, Admin, User):
@@ -229,4 +288,5 @@ if __name__ == '__main__':  # 1134175573 '6126011940' 858380684
     # print(db.keys())
     # print(xl.FindByRole('Админ'))
     # print(db.get(6126011940))
-    pass
+    print(Admin(1134175573).bestWins())
+    # pass
