@@ -3,60 +3,59 @@ import logging
 
 import os
 
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.storage.redis import RedisStorage, RedisEventIsolation
+
 from telegram_part.config import TOKEN
-from telegram_part.Users import Admin, Player, User, Referee, Trainer, PlaceInRating, UserRating, Competition
+from telegram_part.Users import Admin, Player, User, Referee, Trainer, PlaceInRating, UserRating, Competition, auth, \
+    StatusRegistration
 from telegram_part.Users import auntendefication
 from aiogram import Bot, Dispatcher, types, Router
 from aiogram.filters.command import Command, Message
 from aiogram import F
-from aiogram.types import ReplyKeyboardRemove, KeyboardButton
+from aiogram.types import ReplyKeyboardRemove, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardMarkup
 from aiogram.utils.markdown import hide_link
 from aiogram.types import FSInputFile, Message
 
-# Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
-# Объект бота
+
 bot = Bot(token=TOKEN)
-# Диспетчер
-dp = Dispatcher()
-
-
-# Хэндлер на команду /start
-
-# СТАРТ
+storage = RedisStorage.from_url('redis://127.0.0.1:6379/0')
+dp = Dispatcher(storage=storage)
 
 
 @dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    user = auntendefication(message.from_user.id)
+@auth
+async def cmd_start(message: types.Message, user: User = None):
     kb = [
         [types.KeyboardButton(text="Профиль")],
+        [types.KeyboardButton(text="Рейтинг")],
         [types.KeyboardButton(text="Запись на турнир")],
         [types.KeyboardButton(text="КОФНТ")]
     ]
-    if user.__class__ != User:
-        kb.insert(2, [types.KeyboardButton(text="Рейтинг")])
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=kb,
         resize_keyboard=True,
         input_field_placeholder="Выберите пункт меню:"
     )
     await message.answer("Привет! Я бот Калининградской областной федерации настольного тенниса,"
-                         "могу выполнять различные функции, которые помогут вашей спортивной карьере!\nВыберете пункт из"
-                         "предоставленных, чтобы получить нужную для вас информацию.❗\n", reply_markup=keyboard)
+                         "могу выполнять различные функции, которые помогут вашей спортивной карьере!\n"
+                         "Выберете пункт из предоставленных, чтобы получить нужную для вас информацию.❗\n",
+                         reply_markup=keyboard)
 
 
 @dp.message(F.text.lower() == "на главную")
 async def cmd_start(message: types.Message):
-    user = auntendefication(message.from_user.id)
     kb = [
         [types.KeyboardButton(text="Профиль")],
+        [types.KeyboardButton(text="Рейтинг")],
         [types.KeyboardButton(text="Запись на турнир")],
         [types.KeyboardButton(text="КОФНТ")]
     ]
-    if user.__class__ != User:
-        kb.insert(2, [types.KeyboardButton(text="Рейтинг")])
+
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=kb,
         resize_keyboard=True,
@@ -154,8 +153,8 @@ async def send_random_value(callback: types.CallbackQuery):
 
 
 @dp.message(F.text.lower() == "результаты соревнований")
-async def cmd_start(message: types.Message):
-    user = auntendefication(message.from_user.id)
+@auth
+async def cmd_start(message: types.Message, user: User = None):
     builder = InlineKeyboardBuilder()
     if user.__class__ is Admin:
         builder.add(types.InlineKeyboardButton(
@@ -221,11 +220,7 @@ async def cmd_start(message: types.Message):
 
 # @dp.message(F.text.lower() == "профиль")
 #
-# @dp.callback_query(F.data == "reg")
-# async def send_random_value(callback: types.CallbackQuery):
-#     user = User(callback.message.from_user.id)
-#
-#     await callback.message.answer("напишите свою имя фамилию и номер телефона через пробел")
+
 
 @dp.message(F.text.lower() == "лучшие матчи")
 async def cmd_start(message: types.Message):
@@ -289,15 +284,82 @@ async def cmd_start(message: types.Message):
 #     )
 #     await callback.message.answer("Что вы хотите узнать о себе", reply_markup=keyboard)
 
+router = Router()
+
+
+class Registration(StatesGroup):
+    writingName = State()
+    writingPhoneNum = State()
+
+
+@router.callback_query(F.data == "reg")  # StateFilter(None)
+async def send_random_value(callback: types.CallbackQuery, state: FSMContext):
+    # user = User(callback.message.from_user.id)
+    # user.signIn()
+    await callback.message.answer("Напишите свое ФИО через пробел")
+    await state.set_state(Registration.writingName)
+
+
+@router.message(Registration.writingName)
+async def getUserName(message: types.Message, state: FSMContext):
+    full_name = [i.title() for i in str(message.text).split(" ")]
+    # print(tuple(map(lambda x: not x.isdigit(), full_name)))
+    if len(full_name) == 2 and (False not in tuple(map(lambda x: not x.isdigit(), full_name))):
+        await state.set_data(full_name)
+        await message.answer('Напишите ваш номер телефона: ')
+        await state.set_state(Registration.writingPhoneNum)
+    else:
+        await message.answer("Некорректное имя. Напишите свое ФИО через пробел снова:")
+
+
+@router.message(Registration.writingPhoneNum)
+async def getUserPhone(message: types.Message, state: FSMContext):
+    user = auntendefication(657253131)
+    num = str(message.text)
+    data = await state.get_data()
+    if (num[0:2] == '+7' and len(num) == 12) or (num[0] == '8' and len(num) == 11):
+        user.signIn(*data, num)
+        await sendAdmins(message)
+        await message.answer("Ваши данные находятся на рассмотрении.\nВам придет уведомление об состоянии заявления =)")
+        await state.clear()
+    else:
+        await message.answer("Некорректный номер. Напишите снова:")
+
+
+async def sendAdmins(message: types.Message):
+    admins, text = Admin.getApplicationToReg(657253131)  # message.from_user.id test
+    admins = ['6126011940']  # test
+    for tid in admins:
+        accept = InlineKeyboardButton(
+            text="Подтвердить",
+            callback_data="accept")
+        changeName = InlineKeyboardButton(
+            text="Изменить имя",
+            callback_data="changeName")
+        changePhone = InlineKeyboardButton(
+            text="Изменить номер",
+            callback_data="changePhoneNum")
+        toWrite = InlineKeyboardButton(
+            text="Написать",
+            callback_data="toWrite")
+        cancel = InlineKeyboardButton(
+            text="Отклонить",
+            callback_data="cancel")
+        rows = [[accept], [changeName, changePhone], [toWrite], [changeName], ]
+        markup = InlineKeyboardMarkup(inline_keyboard=rows)
+        await bot.send_message(tid, text, reply_markup=markup)
+
 
 @dp.message(F.text.lower() == "профиль")
-async def cmd_start(message: types.Message):
+@auth
+async def cmd_start(message: types.Message, user: User = None):
     builder = InlineKeyboardBuilder()
 
-    user = auntendefication(message.from_user.id)
-    ApplyToRegistraition = user.isUserSignIn()
-    print(ApplyToRegistraition)
-    if ApplyToRegistraition is False:
+    status = user.isUserSignIn()
+    print(status)
+    if status == StatusRegistration.in_process.value:
+        await message.answer("Вы уже подали заявление ожидайте!")
+    if status == StatusRegistration.not_registered.value:
         builder.add(types.InlineKeyboardButton(
             text="Зарегистрироваться",
             callback_data="reg")
@@ -307,10 +369,11 @@ async def cmd_start(message: types.Message):
         #     callback_data="random_value2")
         # )
         await message.answer(
-            "Вы не зарегистрированы \nВыберете пункт меню",
+            "Вы не зарегистрированы,\nесли вы являетесь спортсменом федерации зарегистрируйтесь,\n"
+            "иначе выберите игрока интересующего спортсмена",
             reply_markup=builder.as_markup()
         )
-    if ApplyToRegistraition is True:
+    if status == StatusRegistration.registered.value:
         procfile = user.getProcfile()
         wb = [
             [types.KeyboardButton(text="Последние матчи")],
@@ -437,33 +500,8 @@ async def cmd_random(message: types.Message):
     )
 
 
-# на главную
-
-
-@dp.callback_query(F.data == "Approve")
-async def send_random_value(callback: types.CallbackQuery):
-    await callback.message.answer("Добре, давай админчик добавь его id в Excel ты справишься!X)")
-    # надо подумать как сделать так чтобы после нажатия кнопки оно добавляло пользователя в ексель
-
-
-# async def applicationMessageToAdmin():
-#     builder = InlineKeyboardBuilder()
-#     tids, text =Admin.getApplicationToReg()
-#     builder.add(types.InlineKeyboardButton(
-#         text="Принять",
-#         callback_data="Approve")
-#     )
-#     await bot.send_message(tid,
-#         text=text,
-#         reply_markup=builder.as_markup()
-#     )
-#
-# async def sendToUser(tid, text):
-#     await bot.send_message(tid, text)
-
-
-# Запуск процесса поллинга новых апдейтов
 async def main():
+    dp.include_router(router=router)
     await dp.start_polling(bot)
 
 

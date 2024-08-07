@@ -1,3 +1,4 @@
+import enum
 import pprint
 
 from typing import NamedTuple
@@ -68,6 +69,12 @@ class BestMatches(NamedTuple):
     result_parties: str
 
 
+class StatusRegistration(enum.Enum):
+    registered: int = 1
+    in_process: int = 2
+    not_registered: int = 3
+
+
 db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
 
 
@@ -79,30 +86,33 @@ class User:
     def __init__(self, tid: str):
         self.id = tid
 
-    def isUserSignIn(self) -> bool:
-        # user = auntendefication(self.id)
-        # print(user.__class__)
+    def isUserSignIn(self) -> int:
         if self.__class__ is not User:
-            return True  # already reg
+            return StatusRegistration.registered.value
 
         if len(db.hgetall(self.id)) != 0:
-            return True  # in process
-        return False
+            return StatusRegistration.in_process.value  # in process
+
+        return StatusRegistration.not_registered.value
 
     def signIn(self, surname: str, name: str, phone_number: str):
 
-        if self.isUserSignIn():
+        if self.isUserSignIn() == StatusRegistration.registered.value:
             return True  # application is already created
 
         user_data = {'name': name,
                      'surname': surname,
-                     'phone_number': phone_number,
-                     'status': False
+                     'phone_number': phone_number
                      }
 
         db.hset(self.id, mapping=user_data)
-        Admin.getApplicationToReg(tid=self.id)  ## send to all Admins
         return True
+
+    def checkFullName(self):
+        pass
+
+    def checkPhoneNumber(self):
+        pass
 
     def getId(self):
         return self.id
@@ -123,8 +133,6 @@ class User:
                                      result_parties=i[6]))
         return l
 
-
-
     def getLastMatches(self):
         data = cl.LastComp(self.surname + " " + self.name)
         l = []
@@ -141,7 +149,8 @@ class User:
         raiting_FNTR = int(xl.RaitingFNTRBase(self.id))
         category = xl.СategoryBase(self.id)
         rating, place = cl.PlaceInRaitingKOFNT(self.surname + " " + self.name)
-        return Procfile(year=bage, gender=gender, rateKOFNT=rating, rateFNTR=raiting_FNTR, category=category, place=place)
+        return Procfile(year=bage, gender=gender, rateKOFNT=rating, rateFNTR=raiting_FNTR, category=category,
+                        place=place)
 
     def getStatistics(self):
         pass
@@ -156,15 +165,6 @@ class User:
         pass
 
     def matchStatistics(self):
-        pass
-
-    def commonInfo(self):
-        pass
-
-    def employees(self):
-        pass
-
-    def commonStatistics(self):
         pass
 
 
@@ -198,10 +198,10 @@ class Admin(Trainer, Referee):
     @classmethod
     def getApplicationToReg(cls, tid):
         data = db.hgetall(tid)
-
-        text = (f"пользователь подал заявку на регистрацию "
-                f"{data['name']}, {data['surname']}, {data['phone_number']}, ID:{tid}"
-                f"нажмите кнопку для подтвержения")
+        print(data)
+        text = (f"пользователь подал заявку на регистрацию\n"
+                f"Имя: {data['name']}, Фамилия: {data['surname']}, Номер: {data['phone_number']}, ID: {tid}\n"
+                f"нажмите кнопку для подтверждения")
         return xl.FindByRole('Админ'), text
         # applicationMessageToAdmin(adminID, text)
 
@@ -232,10 +232,17 @@ class Admin(Trainer, Referee):
         points = cl.PointsValueYear(year=year, name='')
         return CommonData(comps=comps, matches=matches, sets=sets, points=points)
 
+    # @classmethod
+    # def getAllAdmins(cls):
+    #
 
-def auntendefication(tid: str) -> (User, Player, Trainer, Admin, User):
+
+def auntendefication(tid: str) -> (User, Player, Trainer, Admin):
     cash_time = 600  # 10 minutes
-    cash = db.get(tid)
+    try:
+        cash = db.get(tid)
+    except redis.exceptions.ResponseError:
+        return User(tid)
 
     if cash is not None:
         if cash == 'Админ':  # '6126011940'
@@ -266,13 +273,12 @@ def auntendefication(tid: str) -> (User, Player, Trainer, Admin, User):
     return User(tid)
 
 
-# def auth(func):
-#     def inner(*args, **kwargs):
-#         # user = auntendefication(message.from_user.id)
-#         # print(user)
-#         return func(*args, **kwargs)
-#
-#     return inner
+def auth(func):
+    async def inner(*args):
+        user = auntendefication(657253131)  # message.from_user.id 657253131 kate
+        return await func(*args, user) # kwargs['state']
+
+    return inner
 
 
 if __name__ == '__main__':  # 1134175573 '6126011940' 858380684
@@ -288,5 +294,5 @@ if __name__ == '__main__':  # 1134175573 '6126011940' 858380684
     # print(db.keys())
     # print(xl.FindByRole('Админ'))
     # print(db.get(6126011940))
-    print(Admin(1134175573).bestWins())
+    print(Admin(1134175573).getbestWins())
     # pass
