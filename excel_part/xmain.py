@@ -1,14 +1,14 @@
 import pandas as pd
 
 
-def IsIdInBase(ID: str) -> bool:                #Есть ли в базе такой id
+def IsIdInBase(ID: str) -> bool:                # Есть ли в базе такой id
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
             return True
     return False
 
 
-def GetRoles(ID: str) -> list:                  #Роли человека по id
+def GetRoles(ID: str) -> list:                  # Роли человека по id
     roles = []
     rolesBase = ["Игрок", "Тренер", "Судья", "Админ"]
     for i in range(len(df_base)):
@@ -20,7 +20,7 @@ def GetRoles(ID: str) -> list:                  #Роли человека по 
     return roles
 
 
-def FindByRole(role: str) -> list:
+def FindByRole(role: str) -> list:              # ID по роли
     id = []
     for i in range(len(df_base)):
         if df_base[role].values[i] == 1:
@@ -40,12 +40,28 @@ def NameBase(ID: str) -> str:  # Имя из "База"
             return df_base['Имя'].values[i]
 
 
-def GetIdByName(surename: str, name: str) -> str:                # ID по имени
+def GetIdByName(surename: str, name: str) -> str: # ID по имени
     fullname = surename + name
     for i in range(len(df_base)): 
         if str(fullname).replace(' ', '').lower() == str(df_base["Фамилия"].values[i]).lower() + str(df_base["Имя"].values[i]).lower():
             return str(int(df_base["ID"].values[i]))
     return 0
+
+
+def AddIDbyName(name: str, id: str) -> None:  #Добавить ID по имени
+    surename = name.split(' ')[0]
+    name = name.split(' ')[1]
+    for i in range(len(df_base)):
+        if f"{surename}{name}".lower() == (str(df_base["Фамилия"].values[i]).lower() + str(df_base["Имя"].values[i]).lower()):
+            df_base.at[i, "ID"] = id
+    df_base.to_excel("data/База.xlsx", index=False)
+
+
+def AddPhonebyID(id: str, phone: str) -> None:   #Добавить Номер Телефона по ID
+    for i in range(len(df_base)):
+        if df_base["ID"].values[i] == id:
+            df_base.at[i, "Телефон"] = phone
+    df_base.to_excel("data/База.xlsx", index=False)
 
 
 def GenderBase(ID: str) -> str:  # Пол из "База"
@@ -124,11 +140,9 @@ def GlobalScoreList(num: int) -> str:  # Общий счет из "Список 
     return df_match['Общий счет'].values[num]
 
 
-def CompNameList(num: int) -> str:              # Название соревнований
+def CompNameList(num: int) -> str:       # Название соревнований
     return df_match['Название соревнований'].values[num]
 
 
 df_base = pd.read_excel("data/База.xlsx")
 df_match = pd.read_excel("data/Список матчей.xlsx")
-
-# print(IsIdInBase(6126011940))

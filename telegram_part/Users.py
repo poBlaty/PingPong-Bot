@@ -75,6 +75,12 @@ class StatusRegistration(enum.Enum):
     not_registered: int = 3
 
 
+class ErrorCodes(enum.Enum):
+    no_error: int = 1
+    error_len: int = 2
+    error_symbol: int = 3
+
+
 db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
 
 
@@ -109,11 +115,26 @@ class User:
         return True
 
     def checkFullName(self):
-        pass
+        name = str(self)
+        for i in range(len(name)):
+            if name[i].lower() in '1234567890<>_+=№;:{?.,}~!@#$%^&*()|/\\\'\"':
+                return ErrorCodes.error_symbol.value
+        return ErrorCodes.no_error.value
 
     def checkPhoneNumber(self):
-        pass
+        num = str(self)
+        if num[0] == '+':
+            num = num[1:]
 
+        if len(num) == 11 and (num[0] == '7' or num[0] == '8'):
+            try:
+                int(num)
+                return ErrorCodes.no_error.value
+            except:
+                return ErrorCodes.error_symbol.value
+        else:
+            return ErrorCodes.error_len.value
+        
     def getId(self):
         return self.id
 
