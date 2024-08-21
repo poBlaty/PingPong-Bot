@@ -124,7 +124,7 @@ def GlobalScoreList(num: int) -> str:  # Общий счет из "Список 
     return df_match['Общий счет'].values[num]
 
 
-def CompNameList(num: int) -> str:              # Название соревнований
+def CompNameList(num: int) -> str:       # Название соревнований
     return df_match['Название соревнований'].values[num]
 
 
