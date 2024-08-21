@@ -28,7 +28,7 @@ def FindByRole(role: str) -> list:
     return id
 
 
-def SurenameBase(ID: str) -> str:  # Фамилия из "База"
+def SurnameBase(ID: str) -> str:  # Фамилия из "База"
     for i in range(len(df_base)):
         if ID == df_base["ID"].values[i]:
             return df_base['Фамилия'].values[i]
@@ -40,8 +40,8 @@ def NameBase(ID: str) -> str:  # Имя из "База"
             return df_base['Имя'].values[i]
 
 
-def GetIdByName(surename: str, name: str) -> str:                # ID по имени
-    fullname = surename + name
+def GetIdByName(surname: str, name: str) -> str:                # ID по имени
+    fullname = surname + name
     for i in range(len(df_base)): 
         if str(fullname).replace(' ', '').lower() == str(df_base["Фамилия"].values[i]).lower() + str(df_base["Имя"].values[i]).lower():
             return str(int(df_base["ID"].values[i]))

@@ -6,8 +6,6 @@ from typing import NamedTuple
 import excel_part.xmain as xl
 import excel_part.xfunctoconcl as cl
 
-# from main import applicationMessageToAdmin, sendToUser
-
 import redis
 
 
@@ -73,6 +71,7 @@ class StatusRegistration(enum.Enum):
     registered: int = 1
     in_process: int = 2
     not_registered: int = 3
+    banned: int = 4
 
 
 db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
@@ -83,10 +82,23 @@ class User:
     name: str = None
     surname: str = None
 
-    def __init__(self, tid: str):
+    def __init__(self, tid: str | int):
         self.id = tid
 
+    def _open_banned_file(self) -> bool:
+        with open("data/bannedUsers.txt", 'r') as f:
+            _tid = f.readline()[:-1]
+            while len(_tid) != 0:
+                if _tid == str(self.id):
+                    return True
+                _tid = f.readline().replace('\n', '')
+            return False
+
     def isUserSignIn(self) -> int:
+
+        if self._open_banned_file():
+            return StatusRegistration.banned.value
+
         if self.__class__ is not User:
             return StatusRegistration.registered.value
 
@@ -97,7 +109,7 @@ class User:
 
     def signIn(self, surname: str, name: str, phone_number: str):
 
-        if self.isUserSignIn() == StatusRegistration.registered.value:
+        if self.isUserSignIn() == StatusRegistration.registered.value or self.isUserSignIn() == StatusRegistration.banned.value:
             return True  # application is already created
 
         user_data = {'name': name,
@@ -118,7 +130,7 @@ class User:
         return self.id
 
     def choosePlayer(self, name: str, surname: str) -> int:
-        if xl.GetIdByName(name=name, surename=surname) is None:
+        if xl.GetIdByName(surname=surname, name=name) is None:
             return -1  # not in excel or name or surname are wrong
         self.name = name
         self.surname = surname
@@ -143,12 +155,14 @@ class User:
         return Competition(data[0], l)
 
     def getProcfile(self):
-        age = xl.BirthdayBase(self.id).split('-')
-        bage = f'{age[2]}.{age[1]}.{age[0]}'
+        age = str(xl.BirthdayBase(self.id)).split('-')  # could get a nan Egor fix this
+        bage = f'{age[2]}.{age[1]}.{age[0]}' if len(age) > 1 else age[0]
         gender = xl.GenderBase(self.id)
-        raiting_FNTR = int(xl.RaitingFNTRBase(self.id))
+        raiting_FNTR = xl.RaitingFNTRBase(self.id)
         category = xl.СategoryBase(self.id)
-        rating, place = cl.PlaceInRaitingKOFNT(self.surname + " " + self.name)
+        rating, place = None, None
+        if cl.PlaceInRaitingKOFNT(self.surname + " " + self.name) is not None:
+            rating, place = cl.PlaceInRaitingKOFNT(self.surname + " " + self.name) # rating, place
         return Procfile(year=bage, gender=gender, rateKOFNT=rating, rateFNTR=raiting_FNTR, category=category,
                         place=place)
 
@@ -172,7 +186,7 @@ class Player(User):
     def __init__(self, tid: str):
         super().__init__(tid)
         self.name = xl.NameBase(tid)
-        self.surname = xl.SurenameBase(tid)
+        self.surname = xl.SurnameBase(tid)
 
     def getRating(self):
         result = []
@@ -210,6 +224,23 @@ class Admin(Trainer, Referee):
 
     def authterizeUser(cls, tid):  # in the next update
         pass
+
+    @classmethod
+    def acceptUser(cls, tid):
+        pass
+
+    @classmethod
+    def cancelUser(cls, tid):
+        db.hdel(tid)
+
+    @classmethod
+    def changeUserName(cls, tid, name, surname):
+        db.hset(tid, "name", name)
+        db.hset(tid, "surname", surname)
+
+    @classmethod
+    def changeUserPhone(cls, tid, phone):
+        db.hset(tid, "phone_number", phone)
 
     # async def toWriteUser(self, name: str, surname: str):
     #     if xl.IsIdInBase(xl.GetIdByName(name=name, surename=surname)) is True:
@@ -274,9 +305,9 @@ def auntendefication(tid: str) -> (User, Player, Trainer, Admin):
 
 
 def auth(func):
-    async def inner(*args):
-        user = auntendefication(657253131)  # message.from_user.id 657253131 kate
-        return await func(*args, user) # kwargs['state']
+    async def inner(message, *args):
+        user = auntendefication(message.from_user.id)  # message.from_user.id 657253131 kate
+        return await func(message, *args, user)  # kwargs['state']
 
     return inner
 

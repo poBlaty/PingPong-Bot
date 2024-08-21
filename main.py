@@ -8,6 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.storage.redis import RedisStorage, RedisEventIsolation
 
+from telegram_part import Users
 from telegram_part.config import TOKEN
 from telegram_part.Users import Admin, Player, User, Referee, Trainer, PlaceInRating, UserRating, Competition, auth, \
     StatusRegistration
@@ -294,8 +295,6 @@ class Registration(StatesGroup):
 
 @router.callback_query(F.data == "reg")  # StateFilter(None)
 async def send_random_value(callback: types.CallbackQuery, state: FSMContext):
-    # user = User(callback.message.from_user.id)
-    # user.signIn()
     await callback.message.answer("Напишите свое ФИО через пробел")
     await state.set_state(Registration.writingName)
 
@@ -319,33 +318,85 @@ async def getUserPhone(message: types.Message, state: FSMContext):
     data = await state.get_data()
     if (num[0:2] == '+7' and len(num) == 12) or (num[0] == '8' and len(num) == 11):
         user.signIn(*data, num)
-        await sendAdmins(message)
-        await message.answer("Ваши данные находятся на рассмотрении.\nВам придет уведомление об состоянии заявления =)")
         await state.clear()
+        await sendAdmins(message, state)
+        await message.answer("Ваши данные находятся на рассмотрении.\nВам придет уведомление об состоянии заявления =)")
+
     else:
         await message.answer("Некорректный номер. Напишите снова:")
 
 
-async def sendAdmins(message: types.Message):
+class AdminRegistration(StatesGroup):
+    userName = State()
+    userPhone = State()
+
+
+@router.callback_query(F.data == 'admin_accept')
+async def func_accept(callback: types.CallbackQuery, state: FSMContext):
+    pass
+
+
+@router.callback_query(F.data == 'admin_changeName')
+async def func_changeName(callback: types.CallbackQuery, state: FSMContext):
+    await state.set_state(AdminRegistration.userName)
+    await callback.message.answer("напишите фамилию имя через пробел")
+
+
+@router.message(AdminRegistration.userName)
+async def func_changeName(message: types.Message, state: FSMContext):
+    full_name = [i.title() for i in str(message.text).split(" ")]
+    print(await state.get_data())
+    Admin.changeUserName(await state.get_data(), name=full_name[1], surname=full_name[0])
+    await state.set_state(None)
+
+
+@router.callback_query(F.data == 'admin_changePhoneNum')
+async def func_changePhone(callback: types.CallbackQuery, state: FSMContext):
+    await state.set_state(AdminRegistration.userPhone)
+    await callback.message.answer("напишите телефон через пробел")
+
+
+@router.message(AdminRegistration.userPhone)
+async def func_changePhone(message: types.Message, state: FSMContext):
+    Admin.changeUserPhone(await state.get_data(), phone=message.text)
+    await state.set_state(None)
+
+
+# @router.callback_query(AdminRegistration.toWrite)  # in the future to write a dialog with user
+# async def func_toWrite(callback: types.CallbackQuery, state: FSMContext):
+#     await callback.message.answer("Не реализовано еще")
+
+
+@router.callback_query(F.data == 'admin_cancel')
+async def func_cancel(callback: types.CallbackQuery, state: FSMContext):
+    with open("data/bannedUsers.txt", 'a') as f:
+        f.write(str(await state.get_data()))
+    await Admin.cancelUser(await state.get_data())
+    await callback.message.answer("Забанен ящеролюдами")
+
+
+# @router.message(F.data == "get_all")
+async def sendAdmins(message: types.Message, state: FSMContext):
+    await state.set_data(657253131)  # message.from_user.id
     admins, text = Admin.getApplicationToReg(657253131)  # message.from_user.id test
     admins = ['6126011940']  # test
     for tid in admins:
         accept = InlineKeyboardButton(
             text="Подтвердить",
-            callback_data="accept")
+            callback_data="admin_accept")
         changeName = InlineKeyboardButton(
             text="Изменить имя",
-            callback_data="changeName")
+            callback_data="admin_changeName")
         changePhone = InlineKeyboardButton(
             text="Изменить номер",
-            callback_data="changePhoneNum")
+            callback_data="admin_changePhoneNum")
         toWrite = InlineKeyboardButton(
             text="Написать",
-            callback_data="toWrite")
+            callback_data="admin_toWrite")
         cancel = InlineKeyboardButton(
             text="Отклонить",
-            callback_data="cancel")
-        rows = [[accept], [changeName, changePhone], [toWrite], [changeName], ]
+            callback_data="admin_cancel")
+        rows = [[accept], [changeName, changePhone], [toWrite], [cancel], ]
         markup = InlineKeyboardMarkup(inline_keyboard=rows)
         await bot.send_message(tid, text, reply_markup=markup)
 
@@ -354,9 +405,9 @@ async def sendAdmins(message: types.Message):
 @auth
 async def cmd_start(message: types.Message, user: User = None):
     builder = InlineKeyboardBuilder()
-
     status = user.isUserSignIn()
-    print(status)
+    if status == StatusRegistration.banned.value:
+        await message.answer("Нэ, ты забанен крыса")
     if status == StatusRegistration.in_process.value:
         await message.answer("Вы уже подали заявление ожидайте!")
     if status == StatusRegistration.not_registered.value:
