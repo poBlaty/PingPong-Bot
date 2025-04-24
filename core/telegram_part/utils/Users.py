@@ -1,6 +1,10 @@
+import datetime
 import enum
+import logging
 
 from typing import NamedTuple
+
+import aiofiles
 
 import core.excel_part.xmain as xl
 import core.excel_part.xfunctoconcl as cl
@@ -68,9 +72,10 @@ class BestMatches(NamedTuple):
 
 class StatusRegistration(enum.Enum):
     registered: int = 1
-    in_process: int = 2
-    not_registered: int = 3
-    banned: int = 4
+    access_denied: int = 2
+    in_process: int = 3
+    not_registered: int = 4
+    banned: int = 0
 
 
 class ErrorCodes(enum.Enum):
@@ -80,48 +85,49 @@ class ErrorCodes(enum.Enum):
 
 
 class User:
-    id: str
-    name: str = None
-    surname: str = None
+    # id: str
+    # name: str = None
+    # surname: str = None
 
     def __init__(self, tid: str | int):
         self.id = tid
+        self.name = 'Егор'
+        self.surname = 'Зинчук'
+        if xl.IsIdInBase(tid):
+            self.name = xl.NameBase(tid)
+            self.surname = xl.SurnameBase(tid)
 
-    def _open_banned_file(self) -> bool:
-        with open("data/bannedUsers.txt", 'r') as f:
-            _tid = f.readline()[:-1]
+    async def _open_banned_file(self) -> bool:
+        async with aiofiles.open("data/bannedUsers.txt", 'r') as f:
+            _tid = (await f.readline())[:-1]
             while len(_tid) != 0:
                 if _tid == str(self.id):
                     return True
-                _tid = f.readline().replace('\n', '')
+                _tid = (await f.readline()).replace('\n', '')
             return False
 
-    def isUserSignIn(self) -> int:
+    async def isUserSignIn(self, db: Redis) -> int:
 
-        if self._open_banned_file():
+        if await self._open_banned_file():
             return StatusRegistration.banned.value
 
-        if self.__class__ is not User:
-            return StatusRegistration.registered.value
-        # print(self.id)
-        # print(db.hgetall(self.id))
-        # if len(db.hgetall(self.id)) != 0:
-        #     return StatusRegistration.in_process.value  # in process
+        return int((await db.hget(str(self.id), 'reg')))
 
-        return StatusRegistration.not_registered.value
+    async def signIn(self, tid: int|str, name: str, phone_number: str, db: Redis):
+        role = 'User'
+        try:
+            role = xl.GetRoles(tid)
+        except:
+            logging.critical("excel doesn't work")
 
-    def signIn(self, surname: str, name: str, phone_number: str, db: Redis):
+        user_data = {
+            'status': role,
+            'name': name,
+            'phone_number': str(phone_number),
+            'reg': StatusRegistration.in_process.value
+        }
 
-        if self.isUserSignIn() == StatusRegistration.registered.value or self.isUserSignIn() == StatusRegistration.banned.value:
-            return True  # application is already created
-
-        user_data = {'name': name,
-                     'surname': surname,
-                     'phone_number': phone_number
-                     }
-
-        db.hset(self.id, mapping=user_data)
-        return True
+        await db.hset(str(tid), mapping=user_data)
 
     @staticmethod
     def checkFullName(name: str):
@@ -184,11 +190,17 @@ class User:
         return Procfile(year=bage, gender=gender, rateKOFNT=rating, rateFNTR=raiting_FNTR, category=category,
                         place=place)
 
+    def getRating(self):
+        result = []
+        l = cl.YearPlaceInRaitingKOFNT(str(self.surname) + " " + str(self.name))
+        for mouth_year, rating_list in l:
+            place = PlaceInRating(rating=rating_list[0], place=rating_list[1])
+            result.append(UserRating(mouth_year, place))
+        return result
+
     def getStatistics(self):
         pass
 
-    def __getGraphic(self):
-        pass
 
     def registrationOnTour(self):
         pass
@@ -206,14 +218,6 @@ class Player(User):
         self.name = xl.NameBase(tid)
         self.surname = xl.SurnameBase(tid)
 
-    def getRating(self):
-        result = []
-        l = cl.YearPlaceInRaitingKOFNT(self.surname + " " + self.name)
-        for mouth_year, rating_list in l:
-            place = PlaceInRating(rating=rating_list[0], place=rating_list[1])
-            result.append(UserRating(mouth_year, place))
-        return result
-
 
 class Referee(Player):
     pass
@@ -225,17 +229,18 @@ class Trainer(Player):
         pass
 
 
-class Admin(Trainer, Referee):
+class Admin(Trainer, Referee, User):
 
     @classmethod
-    def getApplicationToReg(cls, tid, db: Redis):
-        data = db.hgetall(tid)
-        print(data)
+    async def getApplicationToReg(cls, tid, db: Redis):
+        name = await db.hget(str(tid), 'name')
+        phone = await db.hget(str(tid), 'phone_number')
         text = (f"пользователь подал заявку на регистрацию\n"
-                f"Имя: {data['name']}, Фамилия: {data['surname']}, Номер: {data['phone_number']}, ID: {tid}\n"
+                f"ФИО: {name}, Номер: {phone}, ID: {tid}\n"
                 f"нажмите кнопку для подтверждения")
-        return xl.FindByRole('Админ'), text
+        return text
         # applicationMessageToAdmin(adminID, text)
+        #xl.FindByRole('Админ'),
 
     def getListOfRedUsers(self):  # in the next update
         pass
@@ -274,7 +279,7 @@ class Admin(Trainer, Referee):
 
     @classmethod
     def getCommonData(cls):
-        year = 2024
+        year = datetime.date.today().strftime("%Y") #2024
         comps = cl.CompsValueYear(year=year, name='')
         matches = cl.MatchValueYear(year=year, name='')
         sets = cl.SetsValueYear(year=year, name='')
