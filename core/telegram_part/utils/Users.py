@@ -1,22 +1,21 @@
 import enum
-import pprint
 
 from typing import NamedTuple
 
-import excel_part.xmain as xl
-import excel_part.xfunctoconcl as cl
+import core.excel_part.xmain as xl
+import core.excel_part.xfunctoconcl as cl
 
-import redis
+from redis import Redis
 
 
 class PlaceInRating(NamedTuple):
-    raiting: int
+    rating: int
     place: int
 
 
 class UserRating(NamedTuple):
     mouth_year: str
-    listRaiting: PlaceInRating
+    listRating: PlaceInRating
 
 
 class Procfile(NamedTuple):
@@ -76,11 +75,8 @@ class StatusRegistration(enum.Enum):
 
 class ErrorCodes(enum.Enum):
     no_error: int = 1
-    error_len: int = 2
-    error_symbol: int = 3
-
-
-db = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
+    error_len: int = 0
+    error_symbol: int = 0
 
 
 class User:
@@ -107,13 +103,14 @@ class User:
 
         if self.__class__ is not User:
             return StatusRegistration.registered.value
-
-        if len(db.hgetall(self.id)) != 0:
-            return StatusRegistration.in_process.value  # in process
+        # print(self.id)
+        # print(db.hgetall(self.id))
+        # if len(db.hgetall(self.id)) != 0:
+        #     return StatusRegistration.in_process.value  # in process
 
         return StatusRegistration.not_registered.value
 
-    def signIn(self, surname: str, name: str, phone_number: str):
+    def signIn(self, surname: str, name: str, phone_number: str, db: Redis):
 
         if self.isUserSignIn() == StatusRegistration.registered.value or self.isUserSignIn() == StatusRegistration.banned.value:
             return True  # application is already created
@@ -126,15 +123,15 @@ class User:
         db.hset(self.id, mapping=user_data)
         return True
 
-    def checkFullName(self):
-        name = str(self)
+    @staticmethod
+    def checkFullName(name: str):
         for i in range(len(name)):
             if name[i].lower() in '1234567890<>_+=№;:{?.,}~!@#$%^&*()|/\\\'\"':
                 return ErrorCodes.error_symbol.value
         return ErrorCodes.no_error.value
 
-    def checkPhoneNumber(self):
-        num = str(self)
+    @staticmethod
+    def checkPhoneNumber(num: str):
         if num[0] == '+':
             num = num[1:]
 
@@ -146,7 +143,7 @@ class User:
                 return ErrorCodes.error_symbol.value
         else:
             return ErrorCodes.error_len.value
-        
+
     def getId(self):
         return self.id
 
@@ -182,8 +179,8 @@ class User:
         raiting_FNTR = xl.RaitingFNTRBase(self.id)
         category = xl.СategoryBase(self.id)
         rating, place = None, None
-        if cl.PlaceInRaitingKOFNT(self.surname + " " + self.name) is not None:
-            rating, place = cl.PlaceInRaitingKOFNT(self.surname + " " + self.name) # rating, place
+        if cl.PlaceInRaitingKOFNT(str(self.surname) + " " + str(self.name)) is not None:
+            rating, place = cl.PlaceInRaitingKOFNT(self.surname + " " + self.name)  # rating, place
         return Procfile(year=bage, gender=gender, rateKOFNT=rating, rateFNTR=raiting_FNTR, category=category,
                         place=place)
 
@@ -213,7 +210,7 @@ class Player(User):
         result = []
         l = cl.YearPlaceInRaitingKOFNT(self.surname + " " + self.name)
         for mouth_year, rating_list in l:
-            place = PlaceInRating(raiting=rating_list[0], place=rating_list[1])
+            place = PlaceInRating(rating=rating_list[0], place=rating_list[1])
             result.append(UserRating(mouth_year, place))
         return result
 
@@ -231,7 +228,7 @@ class Trainer(Player):
 class Admin(Trainer, Referee):
 
     @classmethod
-    def getApplicationToReg(cls, tid):
+    def getApplicationToReg(cls, tid, db: Redis):
         data = db.hgetall(tid)
         print(data)
         text = (f"пользователь подал заявку на регистрацию\n"
@@ -251,16 +248,16 @@ class Admin(Trainer, Referee):
         pass
 
     @classmethod
-    def cancelUser(cls, tid):
+    def cancelUser(cls, tid, db: Redis):
         db.hdel(tid)
 
     @classmethod
-    def changeUserName(cls, tid, name, surname):
+    def changeUserName(cls, tid, name, surname, db: Redis):
         db.hset(tid, "name", name)
         db.hset(tid, "surname", surname)
 
     @classmethod
-    def changeUserPhone(cls, tid, phone):
+    def changeUserPhone(cls, tid, phone, db: Redis):
         db.hset(tid, "phone_number", phone)
 
     # async def toWriteUser(self, name: str, surname: str):
@@ -287,50 +284,6 @@ class Admin(Trainer, Referee):
     # @classmethod
     # def getAllAdmins(cls):
     #
-
-
-def auntendefication(tid: str) -> (User, Player, Trainer, Admin):
-    cash_time = 600  # 10 minutes
-    try:
-        cash = db.get(tid)
-    except redis.exceptions.ResponseError:
-        return User(tid)
-
-    if cash is not None:
-        if cash == 'Админ':  # '6126011940'
-            return Admin(tid)
-        if cash == 'Тренер':
-            return Trainer(tid)
-        if cash == 'Судья':
-            return Referee(tid)
-        if cash == 'Игрок':
-            return Player(tid)
-
-    if xl.IsIdInBase(tid):
-        role = xl.GetRoles(tid)
-        if 'Админ' in role:
-            db.setex(tid, cash_time, 'Админ')  # add to cash
-            return Admin(tid)
-        if 'Тренер' in role:
-            db.setex(tid, cash_time, 'Тренер')
-            return Trainer(tid)
-        if 'Судья' in role:
-            db.setex(tid, cash_time, 'Судья')
-            return Referee(tid)
-        if 'Игрок' in role:
-            db.setex(tid, cash_time, 'Игрок')
-            return Player(tid)
-
-    # db.setex(tid, cash_time, 'Пользователь')
-    return User(tid)
-
-
-def auth(func):
-    async def inner(message, *args):
-        user = auntendefication(message.from_user.id)  # message.from_user.id 657253131 kate
-        return await func(message, *args, user)  # kwargs['state']
-
-    return inner
 
 
 if __name__ == '__main__':  # 1134175573 '6126011940' 858380684
